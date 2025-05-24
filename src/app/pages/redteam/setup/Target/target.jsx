@@ -23,8 +23,7 @@ import CustomTargetConfiguration from './CustomTargetConfiguration';
 import HttpEndpointConfiguration from './HttpEndpointConfiguration';
 import TestTargetConfiguration from './TestTargetConfiguration';
 import WebSocketEndpointConfiguration from './WebSocketEndpointConfiguration';
-import Prompts from '../prompts';
-
+import Prompts from '../Prompts';
 const selectOptions = [...predefinedTargets, customTargetOption];
 const knownTargetIds = predefinedTargets.map((target) => target.value).filter((value) => value !== '');
 
