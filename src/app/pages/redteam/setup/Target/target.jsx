@@ -211,15 +211,15 @@ export default function Targets({ onNext, onBack, setupModalOpen }) {
 
   return (
     <Stack direction="column" spacing={3}>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+      <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }} className='dark:!text-gray-200'>
         Select Red Team Target
       </Typography>
-      <Typography variant="body1">
+      <Typography variant="body1" className='dark:!text-gray-200'>
         A target is the specific LLM or endpoint you want to evaluate in your red teaming process.
         In Promptfoo targets are also known as providers. You can configure additional targets
         later.
       </Typography>
-      <Typography variant="body1">
+      <Typography variant="body1" className='dark:!text-gray-200'>
         For more information on available providers and how to configure them, please visit our{' '}
         <Link href="https://www.promptfoo.dev/docs/providers/" target="_blank" rel="noopener">
           provider documentation
@@ -227,24 +227,36 @@ export default function Targets({ onNext, onBack, setupModalOpen }) {
         .
       </Typography>
       <Box mb={4}>
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'medium', mb: 3 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 'medium', mb: 3 }} className='dark:!text-gray-200'>
           Select a Target
         </Typography>
         <Box sx={{ mt: 2, mb: 2 }}>
-          <FormControl fullWidth>
+          <FormControl fullWidth className="dark:[&_.MuiInputBase-root]:bg-[#3d2070] dark:[&_.MuiInputBase-root]:text-gray-100 dark:[&_.MuiOutlinedInput-notchedOutline]:border-purple-800">
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
               <Box sx={{ flex: 1 }}>
-                <InputLabel id="predefined-target-label">Target Type</InputLabel>
+                <InputLabel id="predefined-target-label" className='dark:!text-gray-200 dark:[&_.MuiInputBase-root]:bg-[#3d2070]'>Target Type</InputLabel>
                 <Select
                   labelId="predefined-target-label"
                   value={selectedTarget.id}
                   onChange={handleTargetChange}
                   label="Target Type"
                   fullWidth
+                  MenuProps={
+                    {
+                      slotProps:{
+                        
+                        className: 'bg-black'
+                      }
+                    }
+                  }
+                  className="dark:[&_.MuiSelect-select]:text-gray-100 dark:[&_.MuiSelect-select]:bg-[#3d2070] dark:[&_.MuiOutlinedInput-notchedOutline]:border-purple-800"
+                  InputLabelProps={{
+                    className: 'dark:!text-gray-300',
+                  }}
                 >
-                  {selectOptions.map((target) => (
-                    <MenuItem key={target.value} value={target.value}>
-                      {target.label}
+                  {selectOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
                     </MenuItem>
                   ))}
                 </Select>
@@ -254,7 +266,7 @@ export default function Targets({ onNext, onBack, setupModalOpen }) {
         </Box>
         <TextField
           fullWidth
-          sx={{ mb: 2 }}
+          className="mb-2 dark:[&_.MuiInputBase-root]:bg-[#3d2070] dark:[&_.MuiInputBase-root]:text-gray-100 dark:[&_.MuiOutlinedInput-notchedOutline]:border-purple-800 dark:[&_.MuiInputLabel-root]:text-gray-300"
           label="Target Name"
           value={selectedTarget.label}
           placeholder="e.g. 'customer-service-agent'"
@@ -262,9 +274,17 @@ export default function Targets({ onNext, onBack, setupModalOpen }) {
           margin="normal"
           required
           autoFocus
-          InputLabelProps={{ shrink: true }}
+          slotProps={{
+            input: {
+              className: 'dark:!text-gray-100 dark:placeholder-white',
+            },
+            root: {
+              className: 'dark:border-purple-800',
+            },
+          }}
         />
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 5 }}>
+
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 5 }} className='dark:!text-gray-200'>
           The target name will be used to report vulnerabilities. Make sure it's meaningful and
           re-use it when generating new redteam configs for the same target. Eg:
           'customer-service-agent', 'compliance-bot'
@@ -281,7 +301,7 @@ export default function Targets({ onNext, onBack, setupModalOpen }) {
         {selectedTarget.id.startsWith('file://') && (
           <>
             {selectedTarget.id.endsWith('.js') && (
-              <Typography variant="body1" sx={{ mt: 1 }}>
+              <Typography variant="body1" sx={{ mt: 1 }} className='dark:!text-gray-200'>
                 Learn how to set up a custom JavaScript provider{' '}
                 <Link
                   href="https://www.promptfoo.dev/docs/providers/custom-api/"

@@ -16,6 +16,7 @@ import Dialog from '@mui/material/Dialog';
 import { styled } from '@mui/material/styles';
 import Logo from './logo';
 import DarkModeToggle from './darkmode';
+import { useUIStore } from '../store/uiStore';
 
 // --- Mock InfoModal ---
 function InfoModal({ open, onClose }) {
@@ -36,7 +37,7 @@ function ApiSettingsModal({ open, onClose }) {
 }
 
 // --- Mock UI Store ---
-const useUIStore = () => ({
+const UIStore = () => ({
   isNavbarVisible: true,
 });
 
@@ -183,10 +184,13 @@ function EvalsDropdown() {
   );
 }
 
-export default function Navigation({ darkMode, onToggleDarkMode,toggleSidebar }) {
+export default function Navigation({ darkMode, onToggleDarkMode, toggleSidebar }) {
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showApiSettingsModal, setShowApiSettingsModal] = useState(false);
-  const { isNavbarVisible } = useUIStore();
+  const { isNavbarVisible } = UIStore();
+
+  const location = useLocation();
+  const showSidebarButton = location.pathname.startsWith('/redteam') || location.pathname.startsWith('/evals');
 
   const handleModalToggle = () => setShowInfoModal((prev) => !prev);
   const handleApiSettingsModalToggle = () => setShowApiSettingsModal((prev) => !prev);
@@ -201,28 +205,29 @@ export default function Navigation({ darkMode, onToggleDarkMode,toggleSidebar })
         className="bg-gray-100 dark:bg-[#271243] shadow-md mb-4 h-12"
       >
         <Toolbar className="px-4 py-1 flex justify-between items-center bg-gray-100 dark:bg-[#271243]">
-          {/* Left: Logo + Nav Links */}
 
-          <IconButton
-            onClick={toggleSidebar}
-          >
-          <MenuIcon className='text-gray-700 dark:text-gray-50'/>
-          </IconButton>
+          {/* Left: Logo + Nav Links */}
           <div className="flex items-center gap-4">
             <Logo />
           </div>
 
           <div className='flex px-4 py-1 items-center justify-between'>
+            {/* You can uncomment these if you want nav links */}
             {/* <CreateDropdown />
-             <EvalsDropdown />
+            <EvalsDropdown />
             <NavLink href="/prompts" label="Prompts" />
             <NavLink href="/datasets" label="Datasets" />
             <NavLink href="/history" label="History" /> */}
           </div>
 
-          {/* Right: Icons + Toggle */}
+          {/* Right: Sidebar Toggle (only for redteam), Icons + Toggle */}
           <div className="flex items-center gap-4 ml-auto mr-2 text-gray-800 dark:text-gray-200">
+            
+            {/* Sidebar toggle ONLY visible on redteam routes */}
+            
+
             <CreateDropdown />
+
             <IconButton
               onClick={handleModalToggle}
               className="hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -242,6 +247,11 @@ export default function Navigation({ darkMode, onToggleDarkMode,toggleSidebar })
             )}
 
             <DarkModeToggle onToggleDarkMode={onToggleDarkMode} />
+            {showSidebarButton && (
+              <IconButton onClick={toggleSidebar} className="text-gray-700 dark:!text-gray-50">
+                <MenuIcon />
+              </IconButton>
+            )}
           </div>
         </Toolbar>
       </StyledAppBar>
