@@ -7,10 +7,11 @@ import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import Menu from '@mui/material/Menu';
+import MenuIcon from '@mui/icons-material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Toolbar from '@mui/material/Toolbar';
 import Tooltip from '@mui/material/Tooltip';
+import Menu from '@mui/material/Menu';
 import Dialog from '@mui/material/Dialog';
 import { styled } from '@mui/material/styles';
 import Logo from './logo';
@@ -90,6 +91,7 @@ function CreateDropdown() {
 
   return (
     <>
+    <div className='bg-gray-300 rounded-3xl dark:bg-[#22103B] '>
       <NavButton
         onClick={handleClick}
         endIcon={<ArrowDropDownIcon />}
@@ -103,7 +105,32 @@ function CreateDropdown() {
         </div>
         
       </NavButton>
-      <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+      
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        slotProps={{
+          paper: {
+            className: 'bg-amber-100 dark:bg-gray-800 rounded-lg shadow-lg text-black dark:text-white',
+            sx: {
+        mt: 1,
+        borderRadius: 2,
+        bgcolor: '#271243',
+        color: 'white',
+        boxShadow: 3,
+        '& .MuiMenuItem-root': {
+          px: 2,
+          py: 1,
+          fontSize: '0.9rem',
+          '&:hover': {
+            bgcolor: 'action.hover',
+          },
+        },
+      },
+          }
+        }}
+      >
         <MenuItem onClick={handleClose} component={Link} to="/setup">
           Eval
         </MenuItem>
@@ -111,6 +138,7 @@ function CreateDropdown() {
           Redteam
         </MenuItem>
       </Menu>
+      </div>
     </>
   );
 }
@@ -155,7 +183,7 @@ function EvalsDropdown() {
   );
 }
 
-export default function Navigation({ darkMode, onToggleDarkMode }) {
+export default function Navigation({ darkMode, onToggleDarkMode,toggleSidebar }) {
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showApiSettingsModal, setShowApiSettingsModal] = useState(false);
   const { isNavbarVisible } = useUIStore();
@@ -174,20 +202,27 @@ export default function Navigation({ darkMode, onToggleDarkMode }) {
       >
         <Toolbar className="px-4 py-1 flex justify-between items-center bg-gray-100 dark:bg-[#271243]">
           {/* Left: Logo + Nav Links */}
+
+          <IconButton
+            onClick={toggleSidebar}
+          >
+          <MenuIcon className='text-gray-700 dark:text-gray-50'/>
+          </IconButton>
           <div className="flex items-center gap-4">
             <Logo />
           </div>
 
           <div className='flex px-4 py-1 items-center justify-between'>
-            <CreateDropdown />
-            <EvalsDropdown />
+            {/* <CreateDropdown />
+             <EvalsDropdown />
             <NavLink href="/prompts" label="Prompts" />
             <NavLink href="/datasets" label="Datasets" />
-            <NavLink href="/history" label="History" />
+            <NavLink href="/history" label="History" /> */}
           </div>
 
           {/* Right: Icons + Toggle */}
           <div className="flex items-center gap-4 ml-auto mr-2 text-gray-800 dark:text-gray-200">
+            <CreateDropdown />
             <IconButton
               onClick={handleModalToggle}
               className="hover:bg-gray-200 dark:hover:bg-gray-700"

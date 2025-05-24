@@ -1,4 +1,4 @@
-import useApiConfig from '@app/stores/apiConfig';
+import useApiConfig from '../stores/apiConfig';
 
 /**
  * Generic API caller that uses the stored API base URL.

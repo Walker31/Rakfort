@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 import { callApi } from '../utils/api.js';
-import { EventProperties, TelemetryEventTypes } from '../../telemetry.js';
 
 export function useTelemetry() {
   const recordEvent = useCallback(
