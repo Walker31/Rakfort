@@ -6,7 +6,7 @@ export default function InfoAlert({ children }) {
   return (
     <Alert
       severity="info"
-      className={`dark:bg-blue-300 dark:text-white`}
+      className={` dark:!text-white !text-black`}
       sx={{
         color:'white',
         '& .MuiAlert-icon': { color: 'info.main' },
@@ -20,7 +20,6 @@ export default function InfoAlert({ children }) {
               ? alpha(theme.palette.info.main, 0.3)
               : alpha(theme.palette.info.main, 0.2)
           }`,
-        '& .MuiAlert-message': { color: 'text.primary' },
       }}
     >
       {children}
