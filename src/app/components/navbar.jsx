@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import EngineeringIcon from '@mui/icons-material/Engineering';
 import InfoIcon from '@mui/icons-material/Info';
+import MenuIcon from '@mui/icons-material/Menu';
+import ViewSidebarIcon from '@mui/icons-material/ViewSidebar';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Toolbar from '@mui/material/Toolbar';
+import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
 import Tooltip from '@mui/material/Tooltip';
 import Menu from '@mui/material/Menu';
 import Dialog from '@mui/material/Dialog';
@@ -35,11 +37,6 @@ function ApiSettingsModal({ open, onClose }) {
     </Dialog>
   );
 }
-
-// --- Mock UI Store ---
-const UIStore = () => ({
-  isNavbarVisible: true,
-});
 
 // --- Mock Environment Flag ---
 const IS_RUNNING_LOCALLY = true;
@@ -104,9 +101,7 @@ function CreateDropdown() {
         <div className='text-gray-800 dark:text-white'>
           Create
         </div>
-        
       </NavButton>
-      
       <Menu
         anchorEl={anchorEl}
         open={open}
@@ -115,20 +110,20 @@ function CreateDropdown() {
           paper: {
             className: 'bg-amber-100 dark:bg-gray-800 rounded-lg shadow-lg text-black dark:text-white',
             sx: {
-        mt: 1,
-        borderRadius: 2,
-        bgcolor: '#271243',
-        color: 'white',
-        boxShadow: 3,
-        '& .MuiMenuItem-root': {
-          px: 2,
-          py: 1,
-          fontSize: '0.9rem',
-          '&:hover': {
-            bgcolor: 'action.hover',
-          },
-        },
-      },
+              mt: 1,
+              borderRadius: 2,
+              bgcolor: '#271243',
+              color: 'white',
+              boxShadow: 3,
+              '& .MuiMenuItem-root': {
+                px: 2,
+                py: 1,
+                fontSize: '0.9rem',
+                '&:hover': {
+                  bgcolor: 'action.hover',
+                },
+              },
+            },
           }
         }}
       >
@@ -170,7 +165,6 @@ function EvalsDropdown() {
         <div className='text-gray-800 dark:text-white'>
           Evals
         </div>
-        
       </NavButton>
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
         <MenuItem onClick={handleClose} component={Link} to="/eval">
@@ -184,11 +178,11 @@ function EvalsDropdown() {
   );
 }
 
-export default function Navigation({ darkMode, onToggleDarkMode, toggleSidebar }) {
+// --- Navigation Component with Separate Drawer & Sidebar Buttons ---
+export default function Navigation({ darkMode, onToggleDarkMode }) {
   const [showInfoModal, setShowInfoModal] = useState(false);
   const [showApiSettingsModal, setShowApiSettingsModal] = useState(false);
-  const { isNavbarVisible } = UIStore();
-
+  const { isNavbarVisible,isDrawerCollapsed,toggleDrawer,toggleSidebar } = useUIStore();
   const location = useLocation();
   const showSidebarButton = location.pathname.startsWith('/redteam') || location.pathname.startsWith('/evals');
 
@@ -208,11 +202,16 @@ export default function Navigation({ darkMode, onToggleDarkMode, toggleSidebar }
 
           {/* Left: Logo + Nav Links */}
           <div className="flex items-center gap-4">
+            <IconButton onClick={toggleDrawer} className="text-gray-700 dark:!text-gray-50 " title="Toggle Drawer">
+              <KeyboardDoubleArrowRightIcon className={isDrawerCollapsed ? "" : "rotate-180"} />
+            </IconButton>
             <Logo />
+            {/* Drawer toggle button (left nav) */}
+            
           </div>
 
           <div className='flex px-4 py-1 items-center justify-between'>
-            {/* You can uncomment these if you want nav links */}
+            {/* Uncomment these if you want nav links */}
             {/* <CreateDropdown />
             <EvalsDropdown />
             <NavLink href="/prompts" label="Prompts" />
@@ -222,10 +221,6 @@ export default function Navigation({ darkMode, onToggleDarkMode, toggleSidebar }
 
           {/* Right: Sidebar Toggle (only for redteam), Icons + Toggle */}
           <div className="flex items-center gap-4 ml-auto mr-2 text-gray-800 dark:text-gray-200">
-            
-            {/* Sidebar toggle ONLY visible on redteam routes */}
-            
-
             <CreateDropdown />
 
             <IconButton
@@ -247,8 +242,10 @@ export default function Navigation({ darkMode, onToggleDarkMode, toggleSidebar }
             )}
 
             <DarkModeToggle onToggleDarkMode={onToggleDarkMode} />
+
+            {/* Sidebar toggle button (right nav) */}
             {showSidebarButton && (
-              <IconButton onClick={toggleSidebar} className="text-gray-700 dark:!text-gray-50">
+              <IconButton onClick={toggleSidebar} className="text-gray-700 dark:!text-gray-50" title="Toggle Sidebar">
                 <MenuIcon />
               </IconButton>
             )}

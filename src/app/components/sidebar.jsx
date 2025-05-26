@@ -58,8 +58,8 @@ export default function Sidebar({
   const navigate = useNavigate();
   const location = useLocation();
 
-  const isSidebarOpen = useUIStore((state) => state.sidebarOpen);
-  const closeSidebar = useUIStore((state) => state.closeSidebar);
+  const isSidebarOpen = useUIStore((state) => state.isSidebarOpen);
+  const closeSidebar = useUIStore((state) => state.toggleSidebar);
 
   // Determine active section
   const isRedteam = location.pathname.startsWith('/redteam');
