@@ -371,7 +371,7 @@ export default function Targets({ onBack, setupModalOpen }) {
           />
         )}
       </Box>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="h6" sx={{color:'white'}} gutterBottom>
         Additional Configuration
       </Typography>
       <CommonConfigurationOptions

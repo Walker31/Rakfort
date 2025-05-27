@@ -238,6 +238,9 @@ export default function Plugins({ onNext, onBack }) {
 
     return (
       <Accordion
+      sx={{
+        bgcolor:'#2B1449'
+      }}
         key={category}
         expanded={isExpanded}
         onChange={(event, expanded) => {
@@ -248,9 +251,8 @@ export default function Plugins({ onNext, onBack }) {
             return newSet;
           });
         }}
-        className="bg-white dark:bg-[#181825] border-none shadow-none"
       >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon sx={{color:'white'}} />}>
           <div className="flex items-center w-full">
             <h2 className="text-lg font-semibold flex-1 text-gray-900 dark:text-gray-100">
               {category} <span className="font-normal text-gray-500 dark:text-gray-400">({selectedCount}/{pluginsToShow.length})</span>
@@ -261,7 +263,7 @@ export default function Plugins({ onNext, onBack }) {
                 onClick={(e) => e.stopPropagation()}
               >
                 <span
-                  className="cursor-pointer hover:underline "
+                  className="cursor-pointer hover:underline dark:text-white"
                   onClick={() => {
                     pluginsToShow.forEach((plugin) => {
                       if (!selectedPlugins.has(plugin)) handlePluginToggle(plugin);
@@ -271,7 +273,7 @@ export default function Plugins({ onNext, onBack }) {
                   Select all
                 </span>
                 <span
-                  className="cursor-pointer hover:underline"
+                  className="cursor-pointer hover:underline dark:text-white"
                   onClick={() => {
                     pluginsToShow.forEach((plugin) => {
                       if (selectedPlugins.has(plugin)) handlePluginToggle(plugin);
@@ -285,80 +287,92 @@ export default function Plugins({ onNext, onBack }) {
           </div>
         </AccordionSummary>
         <AccordionDetails>
-          <Grid container spacing={2}>
-            {pluginsToShow.map((plugin) => (
-              <Grid item xs={12} sm={6} md={4} key={plugin}>
-                <Paper
-                  elevation={1}
+  <Grid container spacing={2}>
+    {pluginsToShow.map((plugin) => {
+      // Determine border color class
+      const borderClass = selectedPlugins.has(plugin)
+        ? PLUGINS_REQUIRING_CONFIG.includes(plugin) && !isPluginConfigured(plugin)
+          ? 'border border-red-500'
+          : 'border border-blue-500'
+        : 'border border-transparent';
+
+      // Determine background class
+      const backgroundClass = selectedPlugins.has(plugin)
+        ? 'bg-blue-50 dark:bg-blue-950'
+        : 'bg-white dark:bg-gray-900';
+
+      // Hover background class
+      const hoverClass = 'hover:bg-blue-100 dark:hover:bg-gray-800';
+
+      return (
+        <Grid item xs={12} sm={6} md={4} key={plugin}>
+          <Paper
+            elevation={1}
+            className={`
+              h-full transition-all p-4
+              ${borderClass}
+              ${backgroundClass}
+              ${hoverClass}
+            `}
+          >
+            <div className="flex flex-col h-full relative">
+              <FormControlLabel
+                sx={{ flex: 1 }}
+                control={
+                  <Checkbox
+                    checked={selectedPlugins.has(plugin)}
+                    onChange={() => handlePluginToggle(plugin)}
+                    color="primary"
+                  />
+                }
+                label={
+                  <div className="flex flex-col gap-1">
+                    {category === 'Recently Used' && getPluginCategory(plugin) && (
+                      <span className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded text-gray-600 dark:text-gray-300 self-start">
+                        {getPluginCategory(plugin)}
+                      </span>
+                    )}
+                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                      {displayNameOverrides[plugin] || categoryAliases[plugin] || plugin}
+                    </span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {subCategoryDescriptions[plugin]}
+                    </span>
+                  </div>
+                }
+              />
+              {selectedPlugins.has(plugin) && PLUGINS_SUPPORTING_CONFIG.includes(plugin) && (
+                <IconButton
+                  size="small"
+                  title={
+                    isPluginConfigured(plugin)
+                      ? 'Edit Configuration'
+                      : 'Configuration Required'
+                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleConfigClick(plugin);
+                  }}
                   className={`
-                    p-4 h-full transition-all
-                    ${selectedPlugins.has(plugin)
-                      ? PLUGINS_REQUIRING_CONFIG.includes(plugin) && !isPluginConfigured(plugin)
-                        ? 'border border-red-500'
-                        : 'border border-blue-500'
-                      : 'border border-transparent'}
-                    ${selectedPlugins.has(plugin)
-                      ? 'bg-blue-50 dark:bg-blue-950'
-                      : 'bg-white dark:bg-gray-900'}
-                    hover:bg-blue-100 dark:hover:bg-gray-800
+                    absolute top-2 right-2 opacity-70
+                    ${PLUGINS_REQUIRING_CONFIG.includes(plugin) && !isPluginConfigured(plugin)
+                      ? 'text-red-600 dark:text-red-400 opacity-100'
+                      : 'text-blue-600 dark:text-blue-400'
+                    }
+                    hover:opacity-100 hover:bg-blue-100 dark:hover:bg-blue-900
                   `}
                 >
-                  <div className="flex flex-col h-full relative">
-                    <FormControlLabel
-                      sx={{ flex: 1 }}
-                      control={
-                        <Checkbox
-                          checked={selectedPlugins.has(plugin)}
-                          onChange={() => handlePluginToggle(plugin)}
-                          color="primary"
-                        />
-                      }
-                      label={
-                        <div className="flex flex-col gap-1">
-                          {category === 'Recently Used' && getPluginCategory(plugin) && (
-                            <span className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded text-gray-600 dark:text-gray-300 self-start">
-                              {getPluginCategory(plugin)}
-                            </span>
-                          )}
-                          <span className="font-medium text-gray-900 dark:text-gray-100">
-                            {displayNameOverrides[plugin] || categoryAliases[plugin] || plugin}
-                          </span>
-                          <span className="text-sm text-gray-500 dark:text-gray-400">
-                            {subCategoryDescriptions[plugin]}
-                          </span>
-                        </div>
-                      }
-                    />
-                    {selectedPlugins.has(plugin) && PLUGINS_SUPPORTING_CONFIG.includes(plugin) && (
-                      <IconButton
-                        size="small"
-                        title={
-                          isPluginConfigured(plugin)
-                            ? 'Edit Configuration'
-                            : 'Configuration Required'
-                        }
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleConfigClick(plugin);
-                        }}
-                        className={`
-                          absolute top-2 right-2 opacity-70
-                          ${PLUGINS_REQUIRING_CONFIG.includes(plugin) && !isPluginConfigured(plugin)
-                            ? 'text-red-600 dark:text-red-400 opacity-100'
-                            : 'text-blue-600 dark:text-blue-400'
-                          }
-                          hover:opacity-100 hover:bg-blue-100 dark:hover:bg-blue-900
-                        `}
-                      >
-                        <SettingsOutlinedIcon fontSize="small" />
-                      </IconButton>
-                    )}
-                  </div>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
-        </AccordionDetails>
+                  <SettingsOutlinedIcon fontSize="small" />
+                </IconButton>
+              )}
+            </div>
+          </Paper>
+        </Grid>
+      );
+    })}
+  </Grid>
+</AccordionDetails>
+
       </Accordion>
     );
   };

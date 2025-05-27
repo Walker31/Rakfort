@@ -116,7 +116,7 @@ export default function Sidebar({
         <IconButton
           onClick={closeSidebar}
           size="small"
-          className="!absolute top-2 right-2 text-gray-700 dark:text-gray-300"
+          className="!absolute top-2 right-2 text-gray-700 dark:!text-gray-300"
         >
           <CloseIcon fontSize="small" />
         </IconButton>
