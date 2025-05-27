@@ -8,7 +8,6 @@ import CircularProgress from '@mui/material/CircularProgress';
 import IconButton from '@mui/material/IconButton';
 import Pagination from '@mui/material/Pagination';
 import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
 import { parse } from 'csv-parse/browser/esm/sync';
 import { useRedTeamConfig } from '../hooks/useRedTeamConfig';
 
@@ -124,7 +123,6 @@ export default function CustomIntentSection() {
           };
         });
       }, UPDATE_DRAFT_MS);
-
       setDraftTimeout(timeout);
     },
     [currentPage, draftTimeout],
@@ -203,15 +201,15 @@ export default function CustomIntentSection() {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Typography variant="body2" color="text.secondary">
+    <div className="flex flex-col gap-4">
+      <p className="text-sm text-gray-600 dark:text-gray-300">
         These prompts are passed directly to your target. They are also used as an initial prompt by
         Promptfoo's automated jailbreak strategies.
-      </Typography>
+      </p>
       {isLoading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+        <div className="flex justify-center items-center py-8">
           <CircularProgress />
-        </Box>
+        </div>
       ) : (
         <>
           {currentIntents.map((intent, index) => {
@@ -219,7 +217,7 @@ export default function CustomIntentSection() {
             const value = actualIndex in draftIntents ? draftIntents[actualIndex] : intent;
 
             return (
-              <Box key={actualIndex} sx={{ display: 'flex', gap: 1 }}>
+              <div key={actualIndex} className="flex gap-2 items-start">
                 <TextField
                   fullWidth
                   multiline
@@ -227,38 +225,48 @@ export default function CustomIntentSection() {
                   value={value}
                   onChange={(e) => handleArrayInputChange('intent', index, e.target.value)}
                   placeholder={EXAMPLE_INTENTS[index % EXAMPLE_INTENTS.length]}
+                  className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-lg transition-colors"
+                  InputProps={{
+                    className: "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100",
+                  }}
                 />
                 <IconButton
                   onClick={() => removeArrayItem('intent', index)}
                   disabled={(localConfig.intent || []).length <= 1}
-                  sx={{ alignSelf: 'flex-start' }}
+                  className="mt-1 text-gray-500 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                 >
                   <DeleteIcon />
                 </IconButton>
-              </Box>
+              </div>
             );
           })}
           {totalPages > 1 && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <div className="flex justify-center mt-2">
               <Pagination
                 count={totalPages}
                 page={currentPage}
                 onChange={(_, page) => setCurrentPage(page)}
                 color="primary"
+                className="dark:text-gray-100"
               />
-            </Box>
+            </div>
           )}
-
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <div className="flex gap-2 mt-2">
             <Button
               startIcon={<AddIcon />}
               onClick={() => addArrayItem('intent')}
               variant="contained"
               disabled={hasEmptyArrayItems(localConfig.intent)}
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white font-medium rounded-lg shadow-none transition-colors"
             >
               Add prompt
             </Button>
-            <Button component="label" variant="outlined" startIcon={<FileUploadIcon />}>
+            <Button
+              component="label"
+              variant="outlined"
+              startIcon={<FileUploadIcon />}
+              className="border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium rounded-lg transition-colors"
+            >
               Upload CSV
               <input
                 type="file"
@@ -270,9 +278,9 @@ export default function CustomIntentSection() {
                 }}
               />
             </Button>
-          </Box>
+          </div>
         </>
       )}
-    </Box>
+    </div>
   );
 }

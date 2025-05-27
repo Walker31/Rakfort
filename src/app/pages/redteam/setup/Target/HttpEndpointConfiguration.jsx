@@ -257,269 +257,260 @@ ${exampleRequest}`;
     }
   };
 
-  return (
-    <Box>
+  return ( <Box>
+  <FormControlLabel
+    control={
+      <Switch
+        checked={Boolean(selectedTarget.config.request)}
+        onChange={(e) => {
+          resetState(e.target.checked);
+          if (e.target.checked) {
+            updateCustomTarget('request', exampleRequest);
+          }
+        }}
+      />
+    }
+    label="Use Raw HTTP Request"
+    className="mb-4 block"
+  />
+
+  {selectedTarget.config.request ? (
+    <Box className="mt-4 p-4 border rounded border-gray-300 dark:border-gray-700 bg-white dark:bg-[#1e1e1e]">
       <FormControlLabel
         control={
           <Switch
-            checked={Boolean(selectedTarget.config.request)}
-            onChange={(e) => {
-              resetState(e.target.checked);
-              if (e.target.checked) {
-                updateCustomTarget('request', exampleRequest);
-              }
-            }}
+            checked={selectedTarget.config.useHttps}
+            onChange={(e) => updateCustomTarget('useHttps', e.target.checked)}
           />
         }
-        label="Use Raw HTTP Request"
-        sx={{ mb: 2, display: 'block' }}
+        label="Use HTTPS"
+        className="mb-4 block"
       />
-      {selectedTarget.config.request ? (
-        <Box
-          mt={2}
-          p={2}
-          sx={{
-            border: 1,
-            borderColor: theme.palette.divider,
-            borderRadius: 1,
-            backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : '#ffffff',
-            '& .token': {
-              background: 'transparent !important',
-            },
-          }}
+
+      <Editor
+        value={selectedTarget.config.request || ''}
+        onValueChange={handleRawRequestChange}
+        highlight={(code) => highlight(code, languages.http)}
+        padding={10}
+        style={{
+          fontFamily: '"Fira code", "Fira Mono", monospace',
+          fontSize: 14,
+          backgroundColor: 'transparent',
+          color: theme.palette.text.primary,
+        }}
+        placeholder={placeholderText}
+        className={`${theme.palette.mode === 'dark' ? 'dark-syntax' : ''}`}
+      />
+
+      {bodyError && (
+        <Typography color="error" variant="body2" className="mt-2">
+          {bodyError}
+        </Typography>
+      )}
+    </Box>
+  ) : (
+    <Box className="mt-4 p-4 border border-gray-300 rounded">
+      <TextField
+        fullWidth
+        label="URL"
+        value={selectedTarget.config.url}
+        onChange={(e) => updateCustomTarget('url', e.target.value)}
+        margin="normal"
+        error={!!urlError}
+        helperText={urlError}
+        placeholder="https://example.com/api/chat"
+        required
+      />
+
+      <FormControl fullWidth margin="normal">
+        <InputLabel id="method-label">Method</InputLabel>
+        <Select
+          labelId="method-label"
+          value={selectedTarget.config.method}
+          onChange={(e) => updateCustomTarget('method', e.target.value)}
+          label="Method"
         >
-          <FormControlLabel
-            control={
-              <Switch
-                checked={selectedTarget.config.useHttps}
-                onChange={(e) => {
-                  const enabled = e.target.checked;
-                  updateCustomTarget('useHttps', enabled);
-                }}
-              />
-            }
-            label="Use HTTPS"
-            sx={{ mb: 2, display: 'block' }}
-          />
-          <Editor
-            value={selectedTarget.config.request || ''}
-            onValueChange={handleRawRequestChange}
-            highlight={(code) => highlight(code, languages.http)}
-            padding={10}
-            style={{
-              fontFamily: '"Fira code", "Fira Mono", monospace',
-              fontSize: 14,
-              backgroundColor: 'transparent',
-              color: theme.palette.text.primary,
-            }}
-            placeholder={placeholderText}
-            className={theme.palette.mode === 'dark' ? 'dark-syntax' : ''}
-          />
-          {bodyError && (
-            <Typography color="error" variant="body2" sx={{ mt: 1 }}>
-              {bodyError}
-            </Typography>
-          )}
-        </Box>
-      ) : (
-        <Box mt={2} p={2} border={1} borderColor="grey.300" borderRadius={1}>
-          <TextField
-            fullWidth
-            label="URL"
-            value={selectedTarget.config.url}
-            onChange={(e) => updateCustomTarget('url', e.target.value)}
-            margin="normal"
-            error={!!urlError}
-            helperText={urlError}
-            placeholder="https://example.com/api/chat"
-            required
-          />
-          <FormControl fullWidth margin="normal">
-            <InputLabel id="method-label">Method</InputLabel>
-            <Select
-              labelId="method-label"
-              value={selectedTarget.config.method}
-              onChange={(e) => updateCustomTarget('method', e.target.value)}
-              label="Method"
-            >
-              {['GET', 'POST'].map((method) => (
-                <MenuItem key={method} value={method}>
-                  {method}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
-            Headers
-          </Typography>
-          {headers.map(({ key, value }, index) => (
-            <Box key={index} display="flex" alignItems="center" mb={1}>
-              <TextField
-                label="Name"
-                value={key}
-                onChange={(e) => updateHeaderKey(index, e.target.value)}
-                sx={{ mr: 1, flex: 1 }}
-              />
-              <TextField
-                label="Value"
-                value={value}
-                onChange={(e) => updateHeaderValue(index, e.target.value)}
-                sx={{ mr: 1, flex: 1 }}
-              />
-              <IconButton onClick={() => removeHeader(index)}>
-                <DeleteIcon />
-              </IconButton>
-            </Box>
+          {['GET', 'POST'].map((method) => (
+            <MenuItem key={method} value={method}>
+              {method}
+            </MenuItem>
           ))}
+        </Select>
+      </FormControl>
 
-          <Button startIcon={<AddIcon />} onClick={addHeader} variant="outlined" sx={{ mt: 1 }}>
-            Add Header
-          </Button>
+      <Typography variant="subtitle1" className="mt-4 mb-2">
+        Headers
+      </Typography>
 
-          <Typography variant="subtitle1" gutterBottom sx={{ mt: 2 }}>
-            Request Body
+      {headers.map(({ key, value }, index) => (
+        <div key={index} className="flex items-center mb-2 gap-2">
+          <TextField
+            label="Name"
+            value={key}
+            onChange={(e) => updateHeaderKey(index, e.target.value)}
+            className="flex-1"
+          />
+          <TextField
+            label="Value"
+            value={value}
+            onChange={(e) => updateHeaderValue(index, e.target.value)}
+            className="flex-1"
+          />
+          <IconButton onClick={() => removeHeader(index)}>
+            <DeleteIcon />
+          </IconButton>
+        </div>
+      ))}
+
+      <Button
+        startIcon={<AddIcon />}
+        onClick={addHeader}
+        variant="outlined"
+        className="mt-2"
+      >
+        Add Header
+      </Button>
+
+      <Typography variant="subtitle1" className="mt-4 mb-2">
+        Request Body
+      </Typography>
+
+      <div
+        className={`border rounded mt-1 relative ${
+          bodyError ? 'border-red-500' : 'border-gray-300'
+        } ${darkMode ? 'bg-[#1e1e1e]' : 'bg-white'}`}
+      >
+        <Editor
+          value={
+            typeof requestBody === 'object'
+              ? JSON.stringify(requestBody, null, 2)
+              : requestBody || ''
+          }
+          onValueChange={handleRequestBodyChange}
+          highlight={(code) =>
+            highlight(code, isJsonContentType ? languages.json : languages.text)
+          }
+          padding={10}
+          style={{
+            fontFamily: '"Fira code", "Fira Mono", monospace',
+            fontSize: 14,
+            minHeight: '100px',
+          }}
+        />
+      </div>
+
+      {bodyError && (
+        <Typography color="error" variant="caption" className="mt-1">
+          {bodyError}
+        </Typography>
+      )}
+    </Box>
+  )}
+
+  <Dialog
+    open={configDialogOpen}
+    onClose={() => setConfigDialogOpen(false)}
+    maxWidth="lg"
+    fullWidth
+  >
+    <DialogTitle>Generate HTTP Configuration</DialogTitle>
+    <DialogContent>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
+        <div>
+          <Typography variant="h6" className="mb-2">
+            Example Request
           </Typography>
-          <Box
-            sx={{
-              border: 1,
-              borderColor: bodyError ? 'error.main' : 'grey.300',
-              borderRadius: 1,
-              mt: 1,
-              position: 'relative',
-              backgroundColor: darkMode ? '#1e1e1e' : '#fff',
-            }}
-          >
+          <Paper elevation={3} className="h-[300px] overflow-auto">
             <Editor
-              value={
-                typeof requestBody === 'object'
-                  ? JSON.stringify(requestBody, null, 2)
-                  : requestBody || ''
-              }
-              onValueChange={handleRequestBodyChange}
-              highlight={(code) =>
-                highlight(code, isJsonContentType ? languages.json : languages.text)
-              }
+              value={request}
+              onValueChange={setRequest}
+              highlight={(code) => highlight(code, languages.http)}
               padding={10}
               style={{
                 fontFamily: '"Fira code", "Fira Mono", monospace',
                 fontSize: 14,
-                minHeight: '100px',
+                backgroundColor: darkMode ? '#1e1e1e' : '#f5f5f5',
               }}
             />
-          </Box>
-          {bodyError && (
-            <Typography color="error" variant="caption" sx={{ mt: 0.5 }}>
-              {bodyError}
-            </Typography>
-          )}
-        </Box>
+          </Paper>
+        </div>
+        <div>
+          <Typography variant="h6" className="mb-2">
+            Example Response
+          </Typography>
+          <Paper elevation={3} className="h-[300px] overflow-auto">
+            <Editor
+              value={response}
+              onValueChange={setResponse}
+              highlight={(code) => highlight(code, languages.json)}
+              padding={10}
+              style={{
+                fontFamily: '"Fira code", "Fira Mono", monospace',
+                fontSize: 14,
+                backgroundColor: darkMode ? '#1e1e1e' : '#f5f5f5',
+              }}
+            />
+          </Paper>
+        </div>
+
+        {error && (
+          <Typography color="error" className="col-span-2">
+            Error: {error}
+          </Typography>
+        )}
+
+        {generatedConfig && (
+          <div className="col-span-2">
+            <div className="flex items-center justify-between mt-4 mb-2">
+              <Typography variant="h6">Generated Configuration</Typography>
+              <IconButton
+                onClick={handleCopy}
+                size="small"
+                title={copied ? 'Copied!' : 'Copy to clipboard'}
+                color={copied ? 'success' : 'default'}
+              >
+                {copied ? <CheckIcon /> : <ContentCopyIcon />}
+              </IconButton>
+            </div>
+            <Paper elevation={3} className="h-80 overflow-auto">
+              <Editor
+                value={yaml.dump(generatedConfig.config)}
+                onValueChange={() => {}}
+                highlight={(code) => highlight(code, languages.yaml)}
+                padding={10}
+                readOnly
+                style={{
+                  fontFamily: '"Fira code", "Fira Mono", monospace',
+                  fontSize: 14,
+                  backgroundColor: darkMode ? '#1e1e1e' : '#f5f5f5',
+                }}
+              />
+            </Paper>
+          </div>
+        )}
+      </div>
+    </DialogContent>
+
+    <DialogActions>
+      <Button onClick={() => setConfigDialogOpen(false)}>Cancel</Button>
+      <Button onClick={handleGenerateConfig} disabled={generating} variant="outlined">
+        {generating ? 'Generating...' : 'Generate'}
+      </Button>
+      {generatedConfig && (
+        <Button onClick={handleApply} variant="contained" color="primary">
+          Apply Configuration
+        </Button>
       )}
-      <Dialog
-        open={configDialogOpen}
-        onClose={() => setConfigDialogOpen(false)}
-        maxWidth="lg"
-        fullWidth
-      >
-        <DialogTitle>Generate HTTP Configuration</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={3} sx={{ mt: 1 }}>
-            <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom>
-                Example Request
-              </Typography>
-              <Paper elevation={3} sx={{ height: '300px', overflow: 'auto' }}>
-                <Editor
-                  value={request}
-                  onValueChange={(val) => setRequest(val)}
-                  highlight={(code) => highlight(code, languages.http)}
-                  padding={10}
-                  style={{
-                    fontFamily: '"Fira code", "Fira Mono", monospace',
-                    fontSize: 14,
-                    backgroundColor: darkMode ? '#1e1e1e' : '#f5f5f5',
-                    minHeight: '100%',
-                  }}
-                />
-              </Paper>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom>
-                Example Response
-              </Typography>
-              <Paper elevation={3} sx={{ height: '300px', overflow: 'auto' }}>
-                <Editor
-                  value={response}
-                  onValueChange={(val) => setResponse(val)}
-                  highlight={(code) => highlight(code, languages.json)}
-                  padding={10}
-                  style={{
-                    fontFamily: '"Fira code", "Fira Mono", monospace',
-                    fontSize: 14,
-                    backgroundColor: darkMode ? '#1e1e1e' : '#f5f5f5',
-                    minHeight: '100%',
-                  }}
-                />
-              </Paper>
-            </Grid>
-            {error && (
-              <Grid item xs={12}>
-                <Typography color="error">Error: {error}</Typography>
-              </Grid>
-            )}
-            {generatedConfig && (
-              <Grid item xs={12}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mt: 2, mb: 1 }}>
-                  <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                    Generated Configuration
-                  </Typography>
-                  <IconButton
-                    onClick={handleCopy}
-                    size="small"
-                    title={copied ? 'Copied!' : 'Copy to clipboard'}
-                    color={copied ? 'success' : 'default'}
-                  >
-                    {copied ? <CheckIcon /> : <ContentCopyIcon />}
-                  </IconButton>
-                </Box>
-                <Paper elevation={3} sx={{ height: '20rem', overflow: 'auto' }}>
-                  <Editor
-                    value={yaml.dump(generatedConfig.config)}
-                    onValueChange={() => {}} // Read-only
-                    highlight={(code) => highlight(code, languages.yaml)}
-                    padding={10}
-                    style={{
-                      fontFamily: '"Fira code", "Fira Mono", monospace',
-                      fontSize: 14,
-                      backgroundColor: darkMode ? '#1e1e1e' : '#f5f5f5',
-                      minHeight: '100%',
-                    }}
-                    readOnly
-                  />
-                </Paper>
-              </Grid>
-            )}
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setConfigDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleGenerateConfig} disabled={generating} variant="outlined">
-            {generating ? 'Generating...' : 'Generate'}
-          </Button>
-          {generatedConfig && (
-            <Button onClick={handleApply} variant="contained" color="primary">
-              Apply Configuration
-            </Button>
-          )}
-        </DialogActions>
-      </Dialog>
-      <HttpAdvancedConfiguration
-        selectedTarget={selectedTarget}
-        updateCustomTarget={updateCustomTarget}
-        defaultRequestTransform={selectedTarget.config.transformRequest}
-      />
-    </Box>
-  );
+    </DialogActions>
+  </Dialog>
+
+  <HttpAdvancedConfiguration
+    selectedTarget={selectedTarget}
+    updateCustomTarget={updateCustomTarget}
+    defaultRequestTransform={selectedTarget.config.transformRequest}
+  />
+</Box>
+  )
 };
 
 export default HttpEndpointConfiguration;

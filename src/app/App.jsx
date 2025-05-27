@@ -6,6 +6,7 @@ import {
   Outlet,
   useLocation,
 } from 'react-router-dom';
+import './index.css';
 import Navigation from './components/navbar.jsx';
 import Sidebar from './components/sidebar.jsx';
 import { Drawer } from './components/drawer.jsx';
@@ -32,7 +33,6 @@ function Layout() {
     toggleSidebar,
   } = useUIStore();
 
-  // Show right Sidebar on /redteam/* or /evals/*
   const showRightSidebar =
     location.pathname.startsWith('/redteam') ||
     location.pathname.startsWith('/evals');
@@ -42,26 +42,28 @@ function Layout() {
       <div className="h-screen flex flex-col overflow-hidden dark:bg-[#22103B]">
         {/* Top Navbar */}
         <div className="fixed top-0 left-0 right-0 z-50">
-          <Navigation/>
+          <Navigation />
         </div>
 
         {/* Body below navbar */}
         <div className="flex flex-1 pt-[64px] h-full overflow-hidden">
           {/* Left Drawer */}
-           <div className={`${isDrawerCollapsed ? 'w-16' : 'w-64'} transition-all duration-300`}>
+          <div className={`${isDrawerCollapsed ? 'w-16' : 'w-64'} transition-all duration-300`}>
             <Drawer collapsed={isDrawerCollapsed} />
           </div>
 
           {/* Main content area */}
           <div className="flex flex-1 h-full overflow-hidden">
-          {/* Sidebar */}
-          {showRightSidebar && isSidebarOpen && <Sidebar />}
+            {/* Sidebar */}
+            {showRightSidebar && isSidebarOpen && <Sidebar />}
 
-          {/* Scrollable Page Content */}
-          <main className="flex-1 overflow-y-auto !p-0">
-            <Outlet className='p-0'/>
-          </main>
-        </div>
+            {/* Scrollable Page Content */}
+            <main className="flex-1 overflow-y-auto min-h-0">
+              <div className="h-full w-full">
+                <Outlet />
+              </div>
+            </main>
+          </div>
         </div>
       </div>
     </RedTeamConfigProvider>
@@ -77,7 +79,6 @@ function ComingSoon({ label }) {
     </div>
   );
 }
-
 
 function App() {
   const router = createBrowserRouter(
@@ -105,7 +106,6 @@ function App() {
         <Route path="datasets" element={<div style={{ padding: 20 }}>Datasets Page</div>} />
         <Route path="history" element={<div style={{ padding: 20 }}>History Page</div>} />
       </Route>
-
     ),
     { basename }
   );

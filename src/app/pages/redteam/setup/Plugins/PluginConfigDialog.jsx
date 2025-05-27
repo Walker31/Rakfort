@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import RemoveIcon from '@mui/icons-material/Remove';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import IconButton from '@mui/material/IconButton';
-import TextField from '@mui/material/TextField';
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  TextField,
+} from '@mui/material';
 
 export default function PluginConfigDialog({
   open,
@@ -17,10 +19,8 @@ export default function PluginConfigDialog({
   onClose,
   onSave,
 }) {
-  // Initialize with provided config
   const [localConfig, setLocalConfig] = useState(config);
 
-  // Update localConfig when config prop changes
   useEffect(() => {
     if (open && plugin && (!localConfig || Object.keys(localConfig).length === 0)) {
       setLocalConfig(config || {});
@@ -29,7 +29,7 @@ export default function PluginConfigDialog({
 
   const handleArrayInputChange = (key, index, value) => {
     setLocalConfig((prev) => {
-      const currentArray = Array.isArray(prev[key]) ? [...(prev[key])] : [''];
+      const currentArray = Array.isArray(prev[key]) ? [...prev[key]] : [''];
       currentArray[index] = value;
       return {
         ...prev,
@@ -41,17 +41,15 @@ export default function PluginConfigDialog({
   const addArrayItem = (key) => {
     setLocalConfig((prev) => ({
       ...prev,
-      [key]: [...(Array.isArray(prev[key]) ? (prev[key]) : []), ''],
+      [key]: [...(Array.isArray(prev[key]) ? prev[key] : []), ''],
     }));
   };
 
   const removeArrayItem = (key, index) => {
     setLocalConfig((prev) => {
-      const currentArray = Array.isArray(prev[key]) ? [...(prev[key])] : [''];
+      const currentArray = Array.isArray(prev[key]) ? [...prev[key]] : [''];
       currentArray.splice(index, 1);
-      if (currentArray.length === 0) {
-        currentArray.push('');
-      }
+      if (currentArray.length === 0) currentArray.push('');
       return {
         ...prev,
         [key]: currentArray,
@@ -64,82 +62,100 @@ export default function PluginConfigDialog({
   };
 
   const renderConfigInputs = () => {
-    if (!plugin) {
-      return null;
-    }
+    if (!plugin) return null;
 
     switch (plugin) {
       case 'policy':
-      case 'prompt-extraction':
+      case 'prompt-extraction': {
         const key = plugin === 'policy' ? 'policy' : 'systemPrompt';
         return (
           <TextField
+            className="mt-4"
             fullWidth
             multiline
             rows={4}
             label={plugin === 'policy' ? 'Policy' : 'System Prompt'}
             variant="outlined"
-            margin="normal"
             value={localConfig[key] || ''}
-            onChange={(e) => setLocalConfig({ ...localConfig, [key]: e.target.value })}
+            onChange={(e) =>
+              setLocalConfig({ ...localConfig, [key]: e.target.value })
+            }
           />
         );
+      }
+
       case 'bfla':
       case 'bola':
-      case 'ssrf':
+      case 'ssrf': {
         const arrayKey =
           plugin === 'bfla'
             ? 'targetIdentifiers'
             : plugin === 'bola'
-              ? 'targetSystems'
-              : 'targetUrls';
-        // Ensure we always have at least one item
-        const currentArray = (localConfig[arrayKey]) || [''];
+            ? 'targetSystems'
+            : 'targetUrls';
+
+        const currentArray = localConfig[arrayKey] || [''];
+
         return (
-          <>
+          <div className="flex flex-col space-y-2 mt-4">
             {currentArray.map((item, index) => (
-              <Box key={index} sx={{ display: 'flex', alignItems: 'center', my: 1 }}>
+              <div
+                key={index}
+                className="flex items-center gap-2 w-full"
+              >
                 <TextField
                   fullWidth
                   label={`${arrayKey} ${index + 1}`}
                   variant="outlined"
                   value={item}
-                  onChange={(e) => handleArrayInputChange(arrayKey, index, e.target.value)}
-                  sx={{ mr: 1 }}
+                  onChange={(e) =>
+                    handleArrayInputChange(arrayKey, index, e.target.value)
+                  }
                 />
-                {/* Only show remove button if there's more than one item */}
                 {currentArray.length > 1 && (
-                  <IconButton onClick={() => removeArrayItem(arrayKey, index)} size="small">
+                  <IconButton
+                    onClick={() => removeArrayItem(arrayKey, index)}
+                    size="small"
+                    className="text-red-500 hover:text-red-700"
+                  >
                     <RemoveIcon />
                   </IconButton>
                 )}
-              </Box>
+              </div>
             ))}
-            <Button
-              startIcon={<AddIcon />}
-              onClick={() => addArrayItem(arrayKey)}
-              variant="outlined"
-              size="small"
-              sx={{ mt: 1 }}
-              disabled={hasEmptyArrayItems(currentArray)}
-            >
-              Add
-            </Button>
-          </>
+            <div>
+              <Button
+                startIcon={<AddIcon />}
+                onClick={() => addArrayItem(arrayKey)}
+                variant="outlined"
+                size="small"
+                disabled={hasEmptyArrayItems(currentArray)}
+                className="mt-2"
+              >
+                Add
+              </Button>
+            </div>
+          </div>
         );
+      }
+
       case 'indirect-prompt-injection':
         return (
           <TextField
+            className="mt-4"
             fullWidth
             label="Indirect Injection Variable"
             variant="outlined"
-            margin="normal"
             value={localConfig.indirectInjectionVar || ''}
             onChange={(e) =>
-              setLocalConfig({ ...localConfig, indirectInjectionVar: e.target.value })
+              setLocalConfig({
+                ...localConfig,
+                indirectInjectionVar: e.target.value,
+              })
             }
           />
         );
+
       default:
         return null;
     }
@@ -156,11 +172,19 @@ export default function PluginConfigDialog({
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Configure {plugin}</DialogTitle>
-      <DialogContent>{renderConfigInputs()}</DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button onClick={handleSave} variant="contained">
+      <DialogTitle className="font-bold text-xl text-gray-800">
+        Configure {plugin}
+      </DialogTitle>
+      <DialogContent className="pt-2">{renderConfigInputs()}</DialogContent>
+      <DialogActions className="px-6 pb-4">
+        <Button onClick={onClose} className="text-gray-600">
+          Cancel
+        </Button>
+        <Button
+          onClick={handleSave}
+          variant="contained"
+          className="bg-blue-600 hover:bg-blue-700 text-white"
+        >
           Save
         </Button>
       </DialogActions>

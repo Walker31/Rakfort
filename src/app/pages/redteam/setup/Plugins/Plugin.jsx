@@ -3,7 +3,6 @@ import { ErrorBoundary } from 'react-error-boundary';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import SearchIcon from '@mui/icons-material/Search';
 import SettingsOutlinedIcon from '@mui/icons-material/SettingsOutlined';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -11,14 +10,10 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
-import { ALL_PLUGINS, categoryAliases,BASE_PLUGINS,PII_PLUGINS,HARM_PLUGINS,DEFAULT_PLUGINS,FOUNDATION_PLUGINS,NIST_AI_RMF_MAPPING,OWASP_LLM_RED_TEAM_MAPPING,OWASP_API_TOP_10_MAPPING,OWASP_LLM_TOP_10_MAPPING,MITRE_ATLAS_MAPPING,PLUGIN_PRESET_DESCRIPTIONS,riskCategories,displayNameOverrides,subCategoryDescriptions } from './constants';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Grid from '@mui/material/Grid';
 import IconButton from '@mui/material/IconButton';
 import Paper from '@mui/material/Paper';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import { alpha } from '@mui/material/styles';
 import { useDebounce } from 'use-debounce';
 import { useRedTeamConfig, useRecentlyUsedPlugins } from '../hooks/useRedTeamConfig';
 import CustomIntentSection from './CustomIntentPluginSection';
@@ -26,14 +21,31 @@ import PluginConfigDialog from './PluginConfigDialog';
 import PresetCard from './PresetCard';
 import { CustomPoliciesSection } from '../Target/CustomPoliciesSection';
 
+import {
+  ALL_PLUGINS,
+  categoryAliases,
+  HARM_PLUGINS,
+  DEFAULT_PLUGINS,
+  FOUNDATION_PLUGINS,
+  NIST_AI_RMF_MAPPING,
+  OWASP_LLM_RED_TEAM_MAPPING,
+  OWASP_API_TOP_10_MAPPING,
+  OWASP_LLM_TOP_10_MAPPING,
+  MITRE_ATLAS_MAPPING,
+  PLUGIN_PRESET_DESCRIPTIONS,
+  riskCategories,
+  displayNameOverrides,
+  subCategoryDescriptions,
+} from './constants';
+
 const PLUGINS_REQUIRING_CONFIG = ['indirect-prompt-injection', 'prompt-extraction'];
 const PLUGINS_SUPPORTING_CONFIG = ['bfla', 'bola', 'ssrf', ...PLUGINS_REQUIRING_CONFIG];
 
 function ErrorFallback({ error }) {
   return (
-    <div role="alert">
-      <p>Something went wrong:</p>
-      <pre>{error.message}</pre>
+    <div role="alert" className="p-4 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100 rounded">
+      <p className="font-bold">Something went wrong:</p>
+      <pre className="whitespace-pre-wrap">{error.message}</pre>
     </div>
   );
 }
@@ -41,6 +53,7 @@ function ErrorFallback({ error }) {
 export default function Plugins({ onNext, onBack }) {
   const { config, updatePlugins } = useRedTeamConfig();
   const { plugins: recentlyUsedPlugins, addPlugin } = useRecentlyUsedPlugins();
+
   const [isCustomMode, setIsCustomMode] = useState(true);
   const [recentlyUsedSnapshot] = useState(() => [...recentlyUsedPlugins]);
   const [selectedPlugins, setSelectedPlugins] = useState(() => {
@@ -67,9 +80,7 @@ export default function Plugins({ onNext, onBack }) {
       () =>
         Array.from(selectedPlugins)
           .map((plugin) => {
-            if (plugin === 'policy') {
-              return null;
-            }
+            if (plugin === 'policy') return null;
             const config = pluginConfig[plugin];
             if (config && Object.keys(config).length > 0) {
               return { id: plugin, config };
@@ -138,9 +149,7 @@ export default function Plugins({ onNext, onBack }) {
   };
 
   const filteredPlugins = useMemo(() => {
-    if (!searchTerm) {
-      return ALL_PLUGINS;
-    }
+    if (!searchTerm) return ALL_PLUGINS;
     return ALL_PLUGINS.filter((plugin) => {
       const lowerSearchTerm = searchTerm.toLowerCase();
       return (
@@ -154,42 +163,15 @@ export default function Plugins({ onNext, onBack }) {
   }, [searchTerm]);
 
   const presets = [
-    {
-      name: 'Recommended',
-      plugins: DEFAULT_PLUGINS,
-    },
-    {
-      name: 'Minimal Test',
-      plugins: new Set(['harmful:hate', 'harmful:self-harm']),
-    },
-    {
-      name: 'RAG',
-      plugins: new Set([...DEFAULT_PLUGINS, 'bola', 'bfla', 'rbac']),
-    },
-    {
-      name: 'Foundation',
-      plugins: new Set(FOUNDATION_PLUGINS),
-    },
-    {
-      name: 'NIST',
-      plugins: new Set(Object.values(NIST_AI_RMF_MAPPING).flatMap((v) => v.plugins)),
-    },
-    {
-      name: 'OWASP LLM Top 10',
-      plugins: new Set(Object.values(OWASP_LLM_TOP_10_MAPPING).flatMap((v) => v.plugins)),
-    },
-    {
-      name: 'OWASP Gen AI Red Team',
-      plugins: new Set(Object.values(OWASP_LLM_RED_TEAM_MAPPING).flatMap((v) => v.plugins)),
-    },
-    {
-      name: 'OWASP API Top 10',
-      plugins: new Set(Object.values(OWASP_API_TOP_10_MAPPING).flatMap((v) => v.plugins)),
-    },
-    {
-      name: 'MITRE',
-      plugins: new Set(Object.values(MITRE_ATLAS_MAPPING).flatMap((v) => v.plugins)),
-    },
+    { name: 'Recommended', plugins: DEFAULT_PLUGINS },
+    { name: 'Minimal Test', plugins: new Set(['harmful:hate', 'harmful:self-harm']) },
+    { name: 'RAG', plugins: new Set([...DEFAULT_PLUGINS, 'bola', 'bfla', 'rbac']) },
+    { name: 'Foundation', plugins: new Set(FOUNDATION_PLUGINS) },
+    { name: 'NIST', plugins: new Set(Object.values(NIST_AI_RMF_MAPPING).flatMap((v) => v.plugins)) },
+    { name: 'OWASP LLM Top 10', plugins: new Set(Object.values(OWASP_LLM_TOP_10_MAPPING).flatMap((v) => v.plugins)) },
+    { name: 'OWASP Gen AI Red Team', plugins: new Set(Object.values(OWASP_LLM_RED_TEAM_MAPPING).flatMap((v) => v.plugins)) },
+    { name: 'OWASP API Top 10', plugins: new Set(Object.values(OWASP_API_TOP_10_MAPPING).flatMap((v) => v.plugins)) },
+    { name: 'MITRE', plugins: new Set(Object.values(MITRE_ATLAS_MAPPING).flatMap((v) => v.plugins)) },
   ];
 
   const updatePluginConfig = useCallback((plugin, newConfig) => {
@@ -197,9 +179,7 @@ export default function Plugins({ onNext, onBack }) {
       const currentConfig = prevConfig[plugin] || {};
       const configChanged = JSON.stringify(currentConfig) !== JSON.stringify(newConfig);
 
-      if (!configChanged) {
-        return prevConfig;
-      }
+      if (!configChanged) return prevConfig;
       return {
         ...prevConfig,
         [plugin]: {
@@ -214,17 +194,11 @@ export default function Plugins({ onNext, onBack }) {
     for (const plugin of selectedPlugins) {
       if (PLUGINS_REQUIRING_CONFIG.includes(plugin)) {
         const config = pluginConfig[plugin];
-        if (!config || Object.keys(config).length === 0) {
-          return false;
-        }
+        if (!config || Object.keys(config).length === 0) return false;
         for (const key in config) {
           const value = config[key];
-          if (Array.isArray(value) && value.length === 0) {
-            return false;
-          }
-          if (typeof value === 'string' && value.trim() === '') {
-            return false;
-          }
+          if (Array.isArray(value) && value.length === 0) return false;
+          if (typeof value === 'string' && value.trim() === '') return false;
         }
       }
     }
@@ -237,39 +211,28 @@ export default function Plugins({ onNext, onBack }) {
   };
 
   const isPluginConfigured = (plugin) => {
-    if (!PLUGINS_REQUIRING_CONFIG.includes(plugin) || plugin === 'policy') {
-      return true;
-    }
+    if (!PLUGINS_REQUIRING_CONFIG.includes(plugin) || plugin === 'policy') return true;
     const config = pluginConfig[plugin];
-    if (!config || Object.keys(config).length === 0) {
-      return false;
-    }
+    if (!config || Object.keys(config).length === 0) return false;
     for (const key in config) {
       const value = config[key];
-      if (Array.isArray(value) && value.length === 0) {
-        return false;
-      }
-      if (typeof value === 'string' && value.trim() === '') {
-        return false;
-      }
+      if (Array.isArray(value) && value.length === 0) return false;
+      if (typeof value === 'string' && value.trim() === '') return false;
     }
     return true;
   };
 
+  // Use only Tailwind for all Paper, Text, and backgrounds
   const renderPluginCategory = (category, plugins) => {
     const pluginsToShow = plugins
       .filter((plugin) => plugin !== 'intent' && plugin !== 'policy')
       .filter((plugin) => filteredPlugins.includes(plugin));
-    if (pluginsToShow.length === 0) {
-      return null;
-    }
+    if (pluginsToShow.length === 0) return null;
     const isExpanded = expandedCategories.has(category);
     const selectedCount = pluginsToShow.filter((plugin) => selectedPlugins.has(plugin)).length;
 
     const getPluginCategory = (plugin) => {
-      if (category !== 'Recently Used') {
-        return null;
-      }
+      if (category !== 'Recently Used') return null;
       return Object.entries(riskCategories).find(([_, plugins]) => plugins.includes(plugin))?.[0];
     };
 
@@ -280,65 +243,46 @@ export default function Plugins({ onNext, onBack }) {
         onChange={(event, expanded) => {
           setExpandedCategories((prev) => {
             const newSet = new Set(prev);
-            if (expanded) {
-              newSet.add(category);
-            } else {
-              newSet.delete(category);
-            }
+            if (expanded) newSet.add(category);
+            else newSet.delete(category);
             return newSet;
           });
         }}
+        className="bg-white dark:bg-[#181825] border-none shadow-none"
       >
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-            <Typography variant="h6" sx={{ fontWeight: 'medium', flex: 1 }}>
-              {category} ({selectedCount}/{pluginsToShow.length})
-            </Typography>
+          <div className="flex items-center w-full">
+            <h2 className="text-lg font-semibold flex-1 text-gray-900 dark:text-gray-100">
+              {category} <span className="font-normal text-gray-500 dark:text-gray-400">({selectedCount}/{pluginsToShow.length})</span>
+            </h2>
             {isExpanded && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  gap: 2,
-                  mr: 2,
-                  '& > *': {
-                    color: 'primary.main',
-                    cursor: 'pointer',
-                    fontSize: '0.875rem',
-                    textDecoration: 'none',
-                    '&:hover': {
-                      textDecoration: 'underline',
-                    },
-                  },
-                }}
+              <div
+                className="flex gap-4 mr-4 text-blue-600 dark:text-blue-400 text-sm"
                 onClick={(e) => e.stopPropagation()}
               >
-                <Box
-                  component="span"
+                <span
+                  className="cursor-pointer hover:underline "
                   onClick={() => {
                     pluginsToShow.forEach((plugin) => {
-                      if (!selectedPlugins.has(plugin)) {
-                        handlePluginToggle(plugin);
-                      }
+                      if (!selectedPlugins.has(plugin)) handlePluginToggle(plugin);
                     });
                   }}
                 >
                   Select all
-                </Box>
-                <Box
-                  component="span"
+                </span>
+                <span
+                  className="cursor-pointer hover:underline"
                   onClick={() => {
                     pluginsToShow.forEach((plugin) => {
-                      if (selectedPlugins.has(plugin)) {
-                        handlePluginToggle(plugin);
-                      }
+                      if (selectedPlugins.has(plugin)) handlePluginToggle(plugin);
                     });
                   }}
                 >
                   Select none
-                </Box>
-              </Box>
+                </span>
+              </div>
             )}
-          </Box>
+          </div>
         </AccordionSummary>
         <AccordionDetails>
           <Grid container spacing={2}>
@@ -346,42 +290,20 @@ export default function Plugins({ onNext, onBack }) {
               <Grid item xs={12} sm={6} md={4} key={plugin}>
                 <Paper
                   elevation={1}
-                  sx={{
-                    p: 2,
-                    height: '100%',
-                    border: (theme) => {
-                      if (selectedPlugins.has(plugin)) {
-                        if (
-                          PLUGINS_REQUIRING_CONFIG.includes(plugin) &&
-                          !isPluginConfigured(plugin)
-                        ) {
-                          return `1px solid ${theme.palette.error.main}`;
-                        }
-                        return `1px solid ${theme.palette.primary.main}`;
-                      }
-                      return undefined;
-                    },
-                    backgroundColor: (theme) =>
-                      selectedPlugins.has(plugin)
-                        ? alpha(theme.palette.primary.main, 0.04)
-                        : 'background.paper',
-                    transition: 'all 0.2s ease-in-out',
-                    '&:hover': {
-                      backgroundColor: (theme) =>
-                        selectedPlugins.has(plugin)
-                          ? alpha(theme.palette.primary.main, 0.08)
-                          : alpha(theme.palette.action.hover, 0.04),
-                    },
-                  }}
+                  className={`
+                    p-4 h-full transition-all
+                    ${selectedPlugins.has(plugin)
+                      ? PLUGINS_REQUIRING_CONFIG.includes(plugin) && !isPluginConfigured(plugin)
+                        ? 'border border-red-500'
+                        : 'border border-blue-500'
+                      : 'border border-transparent'}
+                    ${selectedPlugins.has(plugin)
+                      ? 'bg-blue-50 dark:bg-blue-950'
+                      : 'bg-white dark:bg-gray-900'}
+                    hover:bg-blue-100 dark:hover:bg-gray-800
+                  `}
                 >
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      height: '100%',
-                      position: 'relative',
-                    }}
-                  >
+                  <div className="flex flex-col h-full relative">
                     <FormControlLabel
                       sx={{ flex: 1 }}
                       control={
@@ -392,29 +314,19 @@ export default function Plugins({ onNext, onBack }) {
                         />
                       }
                       label={
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                        <div className="flex flex-col gap-1">
                           {category === 'Recently Used' && getPluginCategory(plugin) && (
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                backgroundColor: 'action.hover',
-                                px: 1,
-                                py: 0.25,
-                                borderRadius: 1,
-                                color: 'text.secondary',
-                                alignSelf: 'flex-start',
-                              }}
-                            >
+                            <span className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded text-gray-600 dark:text-gray-300 self-start">
                               {getPluginCategory(plugin)}
-                            </Typography>
+                            </span>
                           )}
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <span className="font-medium text-gray-900 dark:text-gray-100">
                             {displayNameOverrides[plugin] || categoryAliases[plugin] || plugin}
-                          </Box>
-                          <Typography variant="body2" color="text.secondary">
+                          </span>
+                          <span className="text-sm text-gray-500 dark:text-gray-400">
                             {subCategoryDescriptions[plugin]}
-                          </Typography>
-                        </Box>
+                          </span>
+                        </div>
                       }
                     />
                     {selectedPlugins.has(plugin) && PLUGINS_SUPPORTING_CONFIG.includes(plugin) && (
@@ -429,26 +341,19 @@ export default function Plugins({ onNext, onBack }) {
                           e.stopPropagation();
                           handleConfigClick(plugin);
                         }}
-                        sx={{
-                          position: 'absolute',
-                          top: 8,
-                          right: 8,
-                          opacity: 0.6,
-                          '&:hover': {
-                            opacity: 1,
-                            backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.08),
-                          },
-                          ...(PLUGINS_REQUIRING_CONFIG.includes(plugin) &&
-                            !isPluginConfigured(plugin) && {
-                              color: 'error.main',
-                              opacity: 1,
-                            }),
-                        }}
+                        className={`
+                          absolute top-2 right-2 opacity-70
+                          ${PLUGINS_REQUIRING_CONFIG.includes(plugin) && !isPluginConfigured(plugin)
+                            ? 'text-red-600 dark:text-red-400 opacity-100'
+                            : 'text-blue-600 dark:text-blue-400'
+                          }
+                          hover:opacity-100 hover:bg-blue-100 dark:hover:bg-blue-900
+                        `}
                       >
                         <SettingsOutlinedIcon fontSize="small" />
                       </IconButton>
                     )}
-                  </Box>
+                  </div>
                 </Paper>
               </Grid>
             ))}
@@ -464,226 +369,199 @@ export default function Plugins({ onNext, onBack }) {
       p.plugins.size === selectedPlugins.size
   );
 
+  const selectAllPlugins = () => {
+    filteredPlugins.forEach((plugin) => {
+      if (!selectedPlugins.has(plugin)) handlePluginToggle(plugin);
+    });
+  };
+
+  const selectNonePlugins = () => {
+    filteredPlugins.forEach((plugin) => {
+      if (selectedPlugins.has(plugin)) handlePluginToggle(plugin);
+    });
+  };
+
+  const toggleAccordionCategory = (name, expanded) => {
+    setExpandedCategories((prev) => {
+      const newSet = new Set(prev);
+      expanded ? newSet.add(name) : newSet.delete(name);
+      return newSet;
+    });
+  };
+
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <Box>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
-          Plugin Configuration
-        </Typography>
+      <Box className="px-4 py-6 md:px-10 lg:px-24 bg-indigo-50 dark:bg-[#22103B]">
+        {/* Title */}
+        <h1 className="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">Plugin Configuration</h1>
 
-        <Box sx={{ mb: 4 }}>
-          <Typography
-            variant="h5"
-            sx={{
-              mb: 3,
-              fontWeight: 500,
-              color: 'text.primary',
-            }}
+        {/* Presets */}
+        <section className="mb-10">
+          <h2 className="text-2xl mb-4 font-semibold text-gray-800 dark:text-gray-200">Available Presets</h2>
+          <Grid
+            container
+            spacing={3}
+            className="mb-6"
+            sx={{ justifyContent: { xs: 'center', sm: 'flex-start' } }}
           >
-            Available presets
-          </Typography>
-          <Box>
-            <Grid
-              container
-              spacing={3}
-              sx={{
-                mb: 4,
-                justifyContent: {
-                  xs: 'center',
-                  sm: 'flex-start',
-                },
-              }}
-            >
-              {presets.map((preset) => {
-                const isSelected =
-                  preset.name === 'Custom'
-                    ? isCustomMode
-                    : preset.name === currentlySelectedPreset?.name;
-                return (
-                  <Grid
-                    item
-                    xs={12}
-                    sm={6}
-                    md={4}
-                    lg={3}
-                    key={preset.name}
-                    sx={{
-                      minWidth: { xs: '280px', sm: '320px' },
-                      maxWidth: { xs: '100%', sm: '380px' },
-                    }}
-                  >
-                    <PresetCard
-                      name={preset.name}
-                      description={PLUGIN_PRESET_DESCRIPTIONS[preset.name] || ''}
-                      isSelected={isSelected}
-                      onClick={() => handlePresetSelect(preset)}
-                    />
-                  </Grid>
-                );
-              })}
-            </Grid>
-          </Box>
-        </Box>
+            {presets.map((preset) => {
+              const isSelected =
+                preset.name === 'Custom'
+                  ? isCustomMode
+                  : preset.name === currentlySelectedPreset?.name;
+              return (
+                <Grid
+                  item
+                  xs={12}
+                  sm={6}
+                  md={4}
+                  lg={3}
+                  key={preset.name}
+                  className="min-w-[280px] sm:min-w-[320px] max-w-full sm:max-w-[380px]"
+                >
+                  <PresetCard
+                    name={preset.name}
+                    description={PLUGIN_PRESET_DESCRIPTIONS[preset.name] || ''}
+                    isSelected={isSelected}
+                    onClick={() => handlePresetSelect(preset)}
+                  />
+                </Grid>
+              );
+            })}
+          </Grid>
+        </section>
 
-        <TextField
-          fullWidth
-          variant="outlined"
-          label="Filter Plugins"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{
-            startAdornment: <SearchIcon />,
-          }}
-          sx={{ mb: 3 }}
-        />
+        {/* Filter Plugins (native input for full Tailwind control) */}
+        <div className="mb-6">
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                <path stroke="currentColor" strokeWidth="2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z" />
+              </svg>
+            </span>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Filter Plugins"
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-[#2B1449] text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            />
+          </div>
+        </div>
 
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'flex-end',
-            gap: 2,
-            mb: 2,
-            '& > *': {
-              color: 'primary.main',
-              cursor: 'pointer',
-              fontSize: '0.875rem',
-              textDecoration: 'none',
-              '&:hover': {
-                textDecoration: 'underline',
-              },
-            },
-          }}
-        >
-          <Box
-            component="span"
-            onClick={() => {
-              filteredPlugins.forEach((plugin) => {
-                if (!selectedPlugins.has(plugin)) {
-                  handlePluginToggle(plugin);
-                }
-              });
-            }}
-          >
+        {/* Select All / None */}
+        <div className="flex justify-end gap-6 mb-4 text-blue-600 dark:text-gray-50 text-sm cursor-pointer">
+          <span className="hover:underline" onClick={selectAllPlugins}>
             Select all
-          </Box>
-          <Box
-            component="span"
-            onClick={() => {
-              filteredPlugins.forEach((plugin) => {
-                if (selectedPlugins.has(plugin)) {
-                  handlePluginToggle(plugin);
-                }
-              });
-            }}
-          >
+          </span>
+          <span className="hover:underline" onClick={selectNonePlugins}>
             Select none
-          </Box>
-        </Box>
+          </span>
+        </div>
 
-        <Box sx={{ mb: 3 }}>
+        {/* Plugin Categories */}
+        <div className="mb-10 space-y-8">
           {recentlyUsedSnapshot.length > 0 &&
             renderPluginCategory('Recently Used', recentlyUsedSnapshot)}
           {Object.entries(riskCategories).map(([category, plugins]) =>
             renderPluginCategory(category, plugins)
           )}
 
+          {/* Custom Prompts Accordion */}
           <Accordion
             expanded={expandedCategories.has('Custom Prompts')}
-            onChange={(event, expanded) => {
-              setExpandedCategories((prev) => {
-                const newSet = new Set(prev);
-                if (expanded) {
-                  newSet.add('Custom Prompts');
-                } else {
-                  newSet.delete('Custom Prompts');
+            onChange={(_, expanded) =>
+              toggleAccordionCategory('Custom Prompts', expanded)
+            }
+            slotProps={
+              {
+                root: {
+                  className:'bg-purple-50'
                 }
-                return newSet;
-              });
-            }}
+              }
+            }
           >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography variant="h6" sx={{ fontWeight: 'medium' }}>
+              <span className="text-lg font-medium text-gray-900 dark:text-gray-100">
                 Custom Prompts (
                 {config.plugins.filter(
                   (p) =>
                     typeof p === 'object' &&
-                    'id' in p &&
                     p.id === 'intent' &&
                     'config' in p
                 )[0]?.config?.intent?.length || 0}
                 )
-              </Typography>
+              </span>
             </AccordionSummary>
             <AccordionDetails>
               <CustomIntentSection />
             </AccordionDetails>
           </Accordion>
-        </Box>
 
-        <Accordion
-          expanded={expandedCategories.has('Custom Policies')}
-          onChange={(event, expanded) => {
-            setExpandedCategories((prev) => {
-              const newSet = new Set(prev);
-              if (expanded) {
-                newSet.add('Custom Policies');
-              } else {
-                newSet.delete('Custom Policies');
-              }
-              return newSet;
-            });
-          }}
-        >
-          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="h6" sx={{ fontWeight: 'medium' }}>
-              Custom Policies (
-              {config.plugins.filter(
-                (p) => typeof p === 'object' && 'id' in p && p.id === 'policy'
-              ).length || 0}
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <CustomPoliciesSection />
-          </AccordionDetails>
-        </Accordion>
-
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          <Button
-            variant="outlined"
-            onClick={onBack}
-            startIcon={<KeyboardArrowLeftIcon />}
-            sx={{
-              px: 4,
-              py: 1,
-            }}
+          {/* Custom Policies Accordion */}
+          <Accordion
+            expanded={expandedCategories.has('Custom Policies')}
+            onChange={(_, expanded) =>
+              toggleAccordionCategory('Custom Policies', expanded)
+            }
+            className="!bg-gray-50 dark:!bg-[#1e1b2f] border-none"
           >
-            Back
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <span className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                Custom Policies (
+                {
+                  config.plugins.filter(
+                    (p) => typeof p === 'object' && p.id === 'policy'
+                  ).length
+                }
+                )
+              </span>
+            </AccordionSummary>
+            <AccordionDetails>
+              <CustomPoliciesSection />
+            </AccordionDetails>
+          </Accordion>
+        </div>
+
+        {/* Navigation Buttons */}
+        <div className="flex flex-col-reverse md:flex-row md:justify-between md:items-center gap-6 mt-12">
+          <Button
+          component="div"
+            onClick={onBack}
+            className="px-6 py-2"
+          >
+            <div className="px-6 py-2 rounded-xl text-gray-800 dark:text-gray-100  bg-indigo-300 dark:bg-[#7904DF] hover:bg-[#6903c2] disabled:bg-gray-300"><KeyboardArrowLeftIcon /> Back</div>
           </Button>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <div className="flex items-center gap-4">
             {selectedPlugins.size === 0 && (
-              <Typography variant="body2" color="text.secondary">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
                 Select at least one plugin to continue.
-              </Typography>
+              </span>
             )}
             <Button
-              variant="contained"
+              component="div"
               onClick={onNext}
-              endIcon={<KeyboardArrowRightIcon />}
               disabled={!isConfigValid() || selectedPlugins.size === 0}
-              sx={{
-                px: 4,
-                py: 1,
-              }}
             >
-              Next
+              <div
+                className="px-6 py-2 rounded-xl text-gray-800 dark:text-gray-100  bg-indigo-300 dark:bg-[#7904DF] hover:bg-[#6903c2] disabled:bg-gray-300"
+              >
+                Next
+                <KeyboardArrowRightIcon />
+              </div>
             </Button>
-          </Box>
-        </Box>
+          </div>
+        </div>
 
+        {/* Plugin Config Dialog */}
         <PluginConfigDialog
           open={configDialogOpen}
           plugin={selectedConfigPlugin}
-          config={selectedConfigPlugin ? pluginConfig[selectedConfigPlugin] || {} : {}}
+          config={
+            selectedConfigPlugin
+              ? pluginConfig[selectedConfigPlugin] || {}
+              : {}
+          }
           onClose={() => {
             setConfigDialogOpen(false);
             setSelectedConfigPlugin(null);

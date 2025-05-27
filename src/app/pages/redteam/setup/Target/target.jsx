@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState} from 'react';
+import { useNavigate } from 'react-router-dom';
 import { callApi } from '../../../../utils/api';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
@@ -42,7 +43,7 @@ const requiresPrompt = (target) => {
   return target.id !== 'http' && target.id !== 'websocket' && target.id !== 'browser';
 };
 
-export default function Targets({ onNext, onBack, setupModalOpen }) {
+export default function Targets({ onBack, setupModalOpen }) {
   const { config, updateConfig } = useRedTeamConfig();
   const theme = useTheme();
   const [selectedTarget, setSelectedTarget] = useState(config.target || DEFAULT_HTTP_TARGET);
@@ -56,6 +57,13 @@ export default function Targets({ onNext, onBack, setupModalOpen }) {
   const [testingEnabled, setTestingEnabled] = useState(selectedTarget.id === 'http');
   const { recordEvent } = useTelemetry();
   const [rawConfigJson, setRawConfigJson] = useState(JSON.stringify(selectedTarget.config, null, 2));
+
+  const navigate = useNavigate();
+
+  const onNext = () => {
+    navigate('/redteam/setup/plugin');
+    console.log("next pressed");
+  }
 
   useEffect(() => {
     recordEvent('webui_page_view', { page: 'redteam_config_targets' });
@@ -210,7 +218,8 @@ export default function Targets({ onNext, onBack, setupModalOpen }) {
   };
 
   return (
-    <Stack direction="column" spacing={3}>
+    <div className='px-10 py-4'>
+    <Stack direction="column" spacing={3} >
       <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }} className='dark:!text-gray-200'>
         Select Red Team Target
       </Typography>
@@ -439,5 +448,6 @@ export default function Targets({ onNext, onBack, setupModalOpen }) {
         </Button>
       </Box>
     </Stack>
+    </div>
   );
 }

@@ -12,7 +12,7 @@ export const Drawer = forwardRef(({ collapsed }, ref) => {
       ref={ref}
       className={cn(
         "fixed z-[100] flex h-full flex-col overflow-x-hidden",
-        "border-r border-purple-200 dark:border-purple-800 dark:text-white",
+        "dark:text-white",
         "bg-purple-50 dark:bg-[#1a102b] px-0",
         "[transition:_width_300ms,_left_300ms,_background-color_150ms,_border_150ms]",
         "scrollbar-hidden",

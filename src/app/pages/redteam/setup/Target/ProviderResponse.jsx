@@ -1,79 +1,62 @@
 import React from 'react';
-import { Paper, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 
 const ProviderResponse = ({ providerResponse }) => (
-  <>
-    <Typography variant="subtitle2" gutterBottom>
+  <div className="space-y-4 mt-4">
+    <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
       Headers:
-    </Typography>
-    <Paper elevation={0} sx={{
-      p: 2,
-      bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100'),
-      maxHeight: '200px',
-      overflow: 'auto',
-      mb: 2,
-    }}>
-      <Table size="small">
-        <TableHead>
-          <TableRow>
-            <TableCell>Header</TableCell>
-            <TableCell>Value</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {Object.entries(providerResponse?.metadata?.headers || {}).map(([key, value]) => (
-            <TableRow key={key}>
-              <TableCell sx={{ maxWidth: '200px', wordBreak: 'break-word' }}>{key}</TableCell>
-              <TableCell sx={{ maxWidth: '300px', wordBreak: 'break-word' }}>{value}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </Paper>
-    <Typography variant="subtitle2" gutterBottom>
+    </h3>
+    <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg max-h-[200px] overflow-auto shadow-sm">
+      <table className="min-w-full text-sm table-auto border-collapse">
+        <thead>
+          <tr className="text-left text-gray-600 dark:text-gray-400">
+            <th className="pr-4 pb-2">Header</th>
+            <th className="pb-2">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {Object.entries(providerResponse?.metadata?.headers || {}).map(
+            ([key, value]) => (
+              <tr key={key} className="border-t border-gray-200 dark:border-gray-700">
+                <td className="pr-4 py-2 max-w-[200px] break-words text-gray-800 dark:text-gray-100">{key}</td>
+                <td className="py-2 max-w-[300px] break-words text-gray-800 dark:text-gray-100">{value}</td>
+              </tr>
+            )
+          )}
+        </tbody>
+      </table>
+    </div>
+
+    <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
       Raw Result:
-    </Typography>
-    <Paper elevation={0} sx={{
-      p: 2,
-      bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100'),
-      maxHeight: '200px',
-      overflow: 'auto',
-    }}>
-      <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+    </h3>
+    <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg max-h-[200px] overflow-auto text-sm">
+      <pre className="whitespace-pre-wrap break-words m-0">
         {typeof providerResponse?.raw === 'string'
-          ? providerResponse?.raw
+          ? providerResponse.raw
           : JSON.stringify(providerResponse?.raw, null, 2)}
       </pre>
-    </Paper>
-    <Typography variant="subtitle2" gutterBottom sx={{ mt: 2 }}>
+    </div>
+
+    <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
       Parsed Result:
-    </Typography>
-    <Paper elevation={0} sx={{
-      p: 2,
-      bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100'),
-      maxHeight: '200px',
-      overflow: 'auto',
-    }}>
-      <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+    </h3>
+    <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg max-h-[200px] overflow-auto text-sm">
+      <pre className="whitespace-pre-wrap break-words m-0">
         {typeof providerResponse?.output === 'string'
-          ? providerResponse?.output
+          ? providerResponse.output
           : JSON.stringify(providerResponse?.output, null, 2)}
       </pre>
-    </Paper>
-    <Typography variant="subtitle2" gutterBottom sx={{ mt: 2 }}>
+    </div>
+
+    <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
       Session ID:
-    </Typography>
-    <Paper elevation={0} sx={{
-      p: 2,
-      bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100'),
-      maxHeight: '200px',
-      overflow: 'auto',
-    }}>
-      <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+    </h3>
+    <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg max-h-[200px] overflow-auto text-sm">
+      <pre className="whitespace-pre-wrap break-words m-0">
         {providerResponse?.sessionId}
       </pre>
-    </Paper>
-  </>
+    </div>
+  </div>
 );
 
 export default ProviderResponse;
