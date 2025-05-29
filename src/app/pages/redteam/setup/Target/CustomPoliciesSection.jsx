@@ -24,16 +24,42 @@ const PolicyInput = memo(({ id, value, onChange }) => {
   );
 
   return (
-    <TextField
-      label="Policy Text"
-      value={value}
-      onChange={handleChange}
-      multiline
-      rows={4}
-      fullWidth
-      placeholder="Enter your policy guidelines here..."
-    />
-  );
+  <TextField
+    label="Policy Text"
+    value={value}
+    onChange={handleChange}
+    multiline
+    rows={4}
+    fullWidth
+    placeholder="Enter your policy guidelines here..."
+    sx={{ 
+      '& .MuiInputBase-root': {
+        color: 'white',
+      },
+      '& .MuiInputLabel-root': {
+        color: 'white',
+      },
+      '& .MuiOutlinedInput-root': {
+        '& fieldset': {
+          borderColor: 'gray.100',
+        },
+        '&:hover fieldset': {
+          borderColor: 'gray.50',
+        },
+        '&.Mui-focused fieldset': {
+          borderColor: 'gray.50',
+        },
+      },
+    }}
+    InputProps={{
+      style: { color: 'white' },
+    }}
+    InputLabelProps={{
+      style: { color: 'white' },
+    }}
+  />
+);
+
 });
 PolicyInput.displayName = 'PolicyInput';
 
@@ -102,77 +128,87 @@ export const CustomPoliciesSection = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Typography variant="body2" color="text.secondary">
-        Custom policies define rules that the AI should follow. These are used to test if the AI
-        adheres to your specific guidelines and constraints.
-      </Typography>
+  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, color: 'white' }}>
+  <Typography variant="body2" sx={{ color: 'white' }}>
+    Custom policies define rules that the AI should follow. These are used to test if the AI
+    adheres to your specific guidelines and constraints.
+  </Typography>
+
+  <Box
+    sx={{
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      mb: 1,
+    }}
+  >
+    <Button
+      startIcon={<AddIcon />}
+      onClick={handleAddPolicy}
+      variant="contained"
+      sx={{ bgcolor: '#7904DF', color: 'white' }}
+    >
+      Add Policy
+    </Button>
+  </Box>
+
+  <Stack spacing={2}>
+    {policies.map((policy) => (
       <Box
+        key={policy.id}
         sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mb: 1,
+          border: 1,
+          borderColor: 'divider',
+          borderRadius: 1,
+          p: 2,
+          color: 'white',
         }}
       >
-        <Button
-          startIcon={<AddIcon />}
-          onClick={handleAddPolicy}
-          variant="contained"
-          color="primary"
-        >
-          Add Policy
-        </Button>
-      </Box>
-      <Stack spacing={2}>
-        {policies.map((policy) => (
-          <Box
-            key={policy.id}
-            sx={{
-              border: 1,
-              borderColor: 'divider',
-              borderRadius: 1,
-              p: 2,
+        <Box className='flex items-center gap-1'>
+          <TextField
+            label="Policy Name"
+            value={policy.name}
+            onChange={(e) => {
+              setPolicies((prev) =>
+                prev.map((p) => (p.id === policy.id ? { ...p, name: e.target.value } : p))
+              );
             }}
+            size="small"
+            fullWidth
+            InputProps={{
+              style: { color: 'white' },
+            }}
+            InputLabelProps={{
+              style: { color: 'white' },
+            }}
+          />
+          <IconButton
+            onClick={() => {
+              setPolicies((prev) =>
+                prev.map((p) => (p.id === policy.id ? { ...p, isExpanded: !p.isExpanded } : p))
+              );
+            }}
+            sx={{ color: 'white' }}
           >
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <TextField
-                label="Policy Name"
-                value={policy.name}
-                onChange={(e) => {
-                  setPolicies((prev) =>
-                    prev.map((p) => (p.id === policy.id ? { ...p, name: e.target.value } : p)),
-                  );
-                }}
-                size="small"
-                fullWidth
-              />
-              <IconButton
-                onClick={() => {
-                  setPolicies((prev) =>
-                    prev.map((p) => (p.id === policy.id ? { ...p, isExpanded: !p.isExpanded } : p)),
-                  );
-                }}
-              >
-                {policy.isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-              </IconButton>
-              <IconButton
-                onClick={() => setPolicies((prev) => prev.filter((p) => p.id !== policy.id))}
-                color="error"
-              >
-                <DeleteIcon />
-              </IconButton>
-            </Box>
-            <Collapse in={policy.isExpanded}>
-              <Box sx={{ mt: 2 }}>
-                <PolicyInput id={policy.id} value={policy.policy} onChange={handlePolicyChange} />
-              </Box>
-            </Collapse>
+            {policy.isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          </IconButton>
+          <IconButton
+            onClick={() => setPolicies((prev) => prev.filter((p) => p.id !== policy.id))}
+            color="error"
+          >
+            <DeleteIcon />
+          </IconButton>
+        </Box>
+        <Collapse in={policy.isExpanded}>
+          <Box sx={{ mt: 2 }}>
+            <PolicyInput id={policy.id} value={policy.policy} onChange={handlePolicyChange} />
           </Box>
-        ))}
-      </Stack>
-    </Box>
-  );
+        </Collapse>
+      </Box>
+    ))}
+  </Stack>
+</Box>
+  )
 };
 
 export default memo(CustomPoliciesSection);

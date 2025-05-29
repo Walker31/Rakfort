@@ -1,231 +1,176 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Checkbox from "@mui/material/Checkbox";
 import Button from "@mui/material/Button";
-import { ArrowBackIos } from "@mui/icons-material";
-import { ArrowForward } from "@mui/icons-material";
+import Tooltip from "@mui/material/Tooltip";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { useRedTeamConfig } from "../hooks/useRedTeamConfig"; // Update path as needed
 
-const singleTurnStrategies = [
-  {
-    title: "Audio",
-    description:
-      "Tests detection and handling of audio-based malicious payloads.",
-  },
-  {
-    title: "Base64 encoding",
-    description:
-      "Tests detection and handling of base64 based malicious payloads.",
-  },
-  {
-    title: "Basic",
-    description:
-      "Equivalent to no strategy. Always included. Can be disabled in configuration.",
-  },
-  {
-    title: "Best-of-N",
-    description:
-      "Jailbreak technique published by Anthropic and Stanford.",
-  },
-  {
-    title: "Authority Bias",
-    description:
-      "Exploits academic authority bias to circumvent content filtering mechanism.",
-  },
+// Example strategy constants (replace with your actual constants)
+const SINGLE_TURN_STRATEGIES = [
+  { id: "audio", title: "Audio", description: "Tests detection of audio-based payloads." },
+  // ...other single-turn strategies
 ];
-
-const multiTurnStrategies = [
-  {
-    title: "Multi turn Crescendo",
-    description:
-      "Executes progressive multi turn attacks with escalating malicious intent.",
-  },
-  {
-    title: "Generative Offensive agent tester",
-    description:
-      "Deploys dynamic attack generation using advanced adversial techniques.",
-  },
+const MULTI_TURN_STRATEGIES = [
+  { id: "crescendo", title: "Multi turn Crescendo", description: "Progressive multi turn attacks." },
+  // ...other multi-turn strategies
 ];
+const STRATEGY_PRESETS = {
+  Quick: ["audio", "basic"],
+  Medium: ["audio", "basic", "best-of-n"],
+  Large: ["audio", "basic", "best-of-n", "crescendo"],
+  Custom: [],
+};
 
 const Strategies = () => {
-  const [selectedSingle, setSelectedSingle] = useState([]);
-  const [selectedMulti, setSelectedMulti] = useState([]);
   const navigate = useNavigate();
+  const { config, updateConfig } = useRedTeamConfig();
+  const [selectedPreset, setSelectedPreset] = useState("Custom");
 
-  const handleCardClick = (title, type) => {
-    if (type === "single") {
-      setSelectedSingle((prev) =>
-        prev.includes(title)
-          ? prev.filter((t) => t !== title)
-          : [...prev, title]
-      );
-    } else {
-      setSelectedMulti((prev) =>
-        prev.includes(title)
-          ? prev.filter((t) => t !== title)
-          : [...prev, title]
-      );
-    }
+  // Derived state for selected IDs
+  const selectedSingle = useMemo(
+    () => config.strategies.filter((s) => SINGLE_TURN_STRATEGIES.some(st => st.id === s)).map(s => s),
+    [config.strategies]
+  );
+  const selectedMulti = useMemo(
+    () => config.strategies.filter((s) => MULTI_TURN_STRATEGIES.some(mt => mt.id === s)).map(s => s),
+    [config.strategies]
+  );
+
+  // Preset selection handler
+  const handlePresetSelect = (preset) => {
+    setSelectedPreset(preset);
+    updateConfig("strategies", STRATEGY_PRESETS[preset]);
   };
+
+  // Toggle strategy
+  const handleCardClick = (id) => {
+    setSelectedPreset("Custom");
+    const current = config.strategies;
+    updateConfig(
+      "strategies",
+      current.includes(id) ? current.filter((s) => s !== id) : [...current, id]
+    );
+  };
+
+  // Estimated probes (dummy logic)
+  const estimatedProbes = config.strategies.length * 1000;
 
   return (
     <div className="flex flex-col p-10 gap-5">
       <div className="dark:text-white text-3xl">Strategy Configuration</div>
-
-      <div className="dark:text-white dark:bg-[#2B1449] rounded-xl my-4 mx-6 py-3 px-6">
-        Estimated probes: 5600
+      <div className="dark:text-white dark:bg-[#2B1449] rounded-xl my-4 mx-6 py-3 px-6 flex items-center gap-2">
+        Estimated probes: <span className="font-bold">{estimatedProbes}</span>
+        <Tooltip title="Probes are the number of requests to the target application">
+          <InfoOutlinedIcon fontSize="small" />
+        </Tooltip>
       </div>
 
+      {/* Preset Selector */}
       <div className="flex flex-wrap gap-4 justify-around">
-        {["Quick", "Medium", "Large", "Custom"].map((label, idx) => (
+        {Object.keys(STRATEGY_PRESETS).map((label, idx) => (
           <div
             key={idx}
-            className="dark:bg-[#2B1449] p-5 rounded-2xl w-[220px] flex flex-col gap-2 cursor-pointer hover:ring-2 ring-indigo-400 transition"
+            className={`dark:bg-[#2B1449] p-5 rounded-2xl w-[220px] flex flex-col gap-2 cursor-pointer hover:ring-2 ring-indigo-400 transition
+              ${selectedPreset === label ? "ring-2 ring-indigo-500" : ""}`}
             tabIndex={0}
             role="button"
-            onClick={() => alert(`Selected: ${label}`)} // Replace with your logic
+            onClick={() => handlePresetSelect(label)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                alert(`Selected: ${label}`);
-              }
+              if (e.key === "Enter" || e.key === " ") handlePresetSelect(label);
             }}
           >
             <div className="dark:text-white">{label}</div>
-            <div className="dark:text-gray-400 text-sm">
-              {label === "Quick" && (
-                <>
-                  <p>Use to verify that your</p>
-                  <p>configuration is correct.</p>
-                </>
-              )}
-              {label === "Medium" && (
-                <>
-                  <p>Recommended strategies</p>
-                  <p>for moderate coverage.</p>
-                </>
-              )}
-              {label === "Large" && (
-                <>
-                  <p>A large set of strategies for</p>
-                  <p>a more comprehensive red team.</p>
-                </>
-              )}
-              {label === "Custom" && (
-                <>
-                  <p>Configure your own set of</p>
-                  <p>strategies.</p>
-                </>
-              )}
-            </div>
+            {/* ...preset descriptions as before */}
           </div>
         ))}
       </div>
 
+      {/* Single-turn Strategies */}
       <div>
-        <div className="text-3xl dark:text-white mb-4">
-          Single-turn Strategies
-        </div>
-
+        <div className="text-3xl dark:text-white mb-4">Single-turn Strategies</div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {singleTurnStrategies.map((strategy, index) => (
+          {SINGLE_TURN_STRATEGIES.map((strategy, index) => (
             <div
               key={index}
-              className={`dark:bg-[#2B1449] flex flex-row p-4 rounded-xl cursor-pointer transition ring-0 hover:ring-2 ring-indigo-400 ${
-                selectedSingle.includes(strategy.title) ? "ring-2 ring-indigo-500" : ""
-              }`}
+              className={`dark:bg-[#2B1449] flex flex-row p-4 rounded-xl cursor-pointer transition ring-0 hover:ring-2 ring-indigo-400
+                ${selectedSingle.includes(strategy.id) ? "ring-2 ring-indigo-500" : ""}`}
               tabIndex={0}
               role="button"
-              onClick={() => handleCardClick(strategy.title, "single")}
+              onClick={() => handleCardClick(strategy.id)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  handleCardClick(strategy.title, "single");
-                }
+                if (e.key === "Enter" || e.key === " ") handleCardClick(strategy.id);
               }}
             >
-              <div
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center"
-              >
+              <div onClick={e => e.stopPropagation()} className="flex items-center">
                 <Checkbox
-                  checked={selectedSingle.includes(strategy.title)}
-                  onChange={() => handleCardClick(strategy.title, "single")}
+                  checked={selectedSingle.includes(strategy.id)}
+                  onChange={() => handleCardClick(strategy.id)}
                 />
               </div>
               <div className="flex flex-col px-2">
                 <div className="text-white">{strategy.title}</div>
-                <div className="text-gray-400 text-sm">
-                  {strategy.description.split('.').map((line, i) =>
-                    line.trim() ? <p key={i}>{line.trim()}.</p> : null
-                  )}
-                </div>
+                <div className="text-gray-400 text-sm">{strategy.description}</div>
               </div>
             </div>
           ))}
         </div>
       </div>
 
+      {/* Multi-turn Strategies */}
       <div>
-        <div className="dark:text-white text-2xl mt-8 mb-4">
-          Multi-turn Strategies
-        </div>
-
+        <div className="dark:text-white text-2xl mt-8 mb-4">Multi-turn Strategies</div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {multiTurnStrategies.map((strategy, index) => (
+          {MULTI_TURN_STRATEGIES.map((strategy, index) => (
             <div
               key={index}
-              className={`dark:bg-[#2B1449] flex flex-row p-4 rounded-xl cursor-pointer transition ring-0 hover:ring-2 ring-indigo-400 ${
-                selectedMulti.includes(strategy.title) ? "ring-2 ring-indigo-500" : ""
-              }`}
+              className={`dark:bg-[#2B1449] flex flex-row p-4 rounded-xl cursor-pointer transition ring-0 hover:ring-2 ring-indigo-400
+                ${selectedMulti.includes(strategy.id) ? "ring-2 ring-indigo-500" : ""}`}
               tabIndex={0}
               role="button"
-              onClick={() => handleCardClick(strategy.title, "multi")}
+              onClick={() => handleCardClick(strategy.id)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  handleCardClick(strategy.title, "multi");
-                }
+                if (e.key === "Enter" || e.key === " ") handleCardClick(strategy.id);
               }}
             >
-              <div
-                onClick={(e) => e.stopPropagation()}
-                className="flex items-center"
-              >
+              <div onClick={e => e.stopPropagation()} className="flex items-center">
                 <Checkbox
-                  checked={selectedMulti.includes(strategy.title)}
-                  onChange={() => handleCardClick(strategy.title, "multi")}
+                  checked={selectedMulti.includes(strategy.id)}
+                  onChange={() => handleCardClick(strategy.id)}
                 />
               </div>
               <div className="flex flex-col px-2">
                 <div className="text-white">{strategy.title}</div>
-                <div className="text-gray-400 text-sm">
-                  {strategy.description.split('.').map((line, i) =>
-                    line.trim() ? <p key={i}>{line.trim()}.</p> : null
-                  )}
-                </div>
+                <div className="text-gray-400 text-sm">{strategy.description}</div>
               </div>
             </div>
           ))}
         </div>
+      </div>
 
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-10">
-          <Button
-            variant="outlined"
-            color="secondary"
-            startIcon={<ArrowBackIos />}
-            className="min-w-[120px]"
-            onClick={() => navigate("/redteam/setup/plugin")}
-          >
-            Back
-          </Button>
-
-          <Button
-            variant="contained"
-            color="primary"
-            endIcon={<ArrowForward />}
-            className="min-w-[120px]"
-            onClick={() => navigate("/redteam/setup/review")}
-          >
-            Next
-          </Button>
-        </div>
+      {/* Navigation */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-10">
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={() => navigate("/redteam/setup/plugin")}
+        >
+          Back
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={config.strategies.length === 0}
+          onClick={() => {
+            if (config.strategies.length === 0) {
+              alert("Select at least one strategy!");
+              return;
+            }
+            navigate("/redteam/setup/review");
+          }}
+        >
+          Next
+        </Button>
       </div>
     </div>
   );

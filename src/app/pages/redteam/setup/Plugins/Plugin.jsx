@@ -483,16 +483,10 @@ export default function Plugins({ onNext, onBack }) {
 
           {/* Custom Prompts Accordion */}
           <Accordion
+          sx={{ bgcolor:'#2B1449' }}
             expanded={expandedCategories.has('Custom Prompts')}
             onChange={(_, expanded) =>
               toggleAccordionCategory('Custom Prompts', expanded)
-            }
-            slotProps={
-              {
-                root: {
-                  className:'bg-purple-50'
-                }
-              }
             }
           >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -514,11 +508,11 @@ export default function Plugins({ onNext, onBack }) {
 
           {/* Custom Policies Accordion */}
           <Accordion
+          sx={{ bgcolor:'#2B1449' }}
             expanded={expandedCategories.has('Custom Policies')}
             onChange={(_, expanded) =>
               toggleAccordionCategory('Custom Policies', expanded)
             }
-            className="!bg-gray-50 dark:!bg-[#1e1b2f] border-none"
           >
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <span className="text-lg font-medium text-gray-900 dark:text-gray-100">
